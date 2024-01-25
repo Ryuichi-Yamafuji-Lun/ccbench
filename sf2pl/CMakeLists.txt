@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(ccbench_ss2pl
+project(ccbench_sf2pl
         VERSION 0.0.1
-        DESCRIPTION "ss2pl of ccbench"
+        DESCRIPTION "sf2pl of ccbench"
         LANGUAGES CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../cmake")
@@ -25,18 +25,18 @@ include(CompileOptions)
 enable_testing()
 add_subdirectory(test)
 
-file(GLOB SS2PL_SOURCES
+file(GLOB SF2PL_SOURCES
         "../common/result.cc"
         "../common/util.cc"
-        "ss2pl.cc"
+        "sf2pl.cc"
         "result.cc"
         "transaction.cc"
         "util.cc"
         )
 
-add_executable(ss2pl.exe ${SS2PL_SOURCES})
+add_executable(sf2pl.exe ${SF2PL_SOURCES})
 
-target_link_libraries(ss2pl.exe
+target_link_libraries(sf2pl.exe
         Boost::filesystem
         gflags::gflags
         ${PROJECT_SOURCE_DIR}/../third_party/mimalloc/out/release/libmimalloc.a

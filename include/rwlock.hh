@@ -79,7 +79,7 @@ public:
 
   void w_unlock() { counter++; }
 
-  // Upgrae, read -> write
+  // Upgrade, read -> write
   void upgrade() {
     int expected, desired(-1);
     expected = counter.load(memory_order_acquire);

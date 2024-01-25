@@ -1,0 +1,58 @@
+Performing C++ SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /home/ryuichilun/ccbench/sf2pl/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_b2a54/fast && /usr/bin/make -f CMakeFiles/cmTC_b2a54.dir/build.make CMakeFiles/cmTC_b2a54.dir/build
+make[1]: ディレクトリ '/home/ryuichilun/ccbench/sf2pl/build/CMakeFiles/CMakeTmp' に入ります
+Building CXX object CMakeFiles/cmTC_b2a54.dir/src.cxx.o
+/usr/bin/c++    -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_b2a54.dir/src.cxx.o -c /home/ryuichilun/ccbench/sf2pl/build/CMakeFiles/CMakeTmp/src.cxx
+Linking CXX executable cmTC_b2a54
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b2a54.dir/link.txt --verbose=1
+/usr/bin/c++   -DCMAKE_HAVE_LIBC_PTHREAD    CMakeFiles/cmTC_b2a54.dir/src.cxx.o  -o cmTC_b2a54 
+/usr/bin/ld: CMakeFiles/cmTC_b2a54.dir/src.cxx.o: in function `main':
+src.cxx:(.text+0x46): undefined reference to `pthread_create'
+/usr/bin/ld: src.cxx:(.text+0x52): undefined reference to `pthread_detach'
+/usr/bin/ld: src.cxx:(.text+0x63): undefined reference to `pthread_join'
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_b2a54.dir/build.make:87: cmTC_b2a54] エラー 1
+make[1]: ディレクトリ '/home/ryuichilun/ccbench/sf2pl/build/CMakeFiles/CMakeTmp' から出ます
+make: *** [Makefile:121: cmTC_b2a54/fast] エラー 2
+
+
+Source file was:
+#include <pthread.h>
+
+void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/ryuichilun/ccbench/sf2pl/build/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/usr/bin/make cmTC_0bb85/fast && /usr/bin/make -f CMakeFiles/cmTC_0bb85.dir/build.make CMakeFiles/cmTC_0bb85.dir/build
+make[1]: ディレクトリ '/home/ryuichilun/ccbench/sf2pl/build/CMakeFiles/CMakeTmp' に入ります
+Building CXX object CMakeFiles/cmTC_0bb85.dir/CheckFunctionExists.cxx.o
+/usr/bin/c++    -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_0bb85.dir/CheckFunctionExists.cxx.o -c /home/ryuichilun/ccbench/sf2pl/build/CMakeFiles/CheckLibraryExists/CheckFunctionExists.cxx
+Linking CXX executable cmTC_0bb85
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0bb85.dir/link.txt --verbose=1
+/usr/bin/c++   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_0bb85.dir/CheckFunctionExists.cxx.o  -o cmTC_0bb85  -lpthreads 
+/usr/bin/ld: -lpthreads が見つかりません
+collect2: error: ld returned 1 exit status
+make[1]: *** [CMakeFiles/cmTC_0bb85.dir/build.make:87: cmTC_0bb85] エラー 1
+make[1]: ディレクトリ '/home/ryuichilun/ccbench/sf2pl/build/CMakeFiles/CMakeTmp' から出ます
+make: *** [Makefile:121: cmTC_0bb85/fast] エラー 2
+
+
+

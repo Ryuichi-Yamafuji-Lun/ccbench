@@ -1,4 +1,4 @@
-
+// Strong Strict 2PL
 #include <stdio.h>
 #include <string.h>
 

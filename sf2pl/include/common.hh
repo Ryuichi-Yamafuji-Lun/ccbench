@@ -52,4 +52,24 @@ DECLARE_bool(ycsb);
 DECLARE_double(zipf_skew);
 #endif
 
+// Constant
+// Constant for No Timestamp (Cannot be 0 or errors will occur)
+static const uint64_t NO_TIMESTAMP = 0xFFFFFFFFFFFFFFFFULL;
+
+static const uint64_t MAX_THREADS = FLAGS_thread_num;
+
+static const uint64_t REGISTRY_MAX_THREADS = MAX_THREADS;
+
+static const uint64_t NUM_RI = FLAGS_tuple_num;
+
+static const uint64_t NUM_RI_WORD = NUM_RI * MAX_THREADS;
+
+// GLOBAL 
 alignas(CACHE_LINE_SIZE) GLOBAL Tuple *Table;
+
+// Add Conflict Clock
+extern std::atomic<uint64_t> conflict_clock;
+// Add global dynamic array of Announce Timestamp 
+extern std::vector<std::atomic<uint64_t>> announce_timestamps;
+// Add readIndicator [NUM_TUPLE * MAX_THR]
+extern std::atomic<uint64_t>* read_indicators;
