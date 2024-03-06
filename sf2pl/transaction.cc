@@ -193,7 +193,7 @@ void TxExecutor::read(uint64_t key) {
       }
       // Check conflict thread and conflict thread timestamp
       // writer thid because only writer will cause conflict
-      this->conflict_thid_ = tuple->writer_thid_;
+      this->conflict_thid_ = write_locks[key].load(std::memory_order_relaxed);
       this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
       // Check if timestamp is smaller
       if (this->conflict_timestamp_.load() < this->thread_timestamp_.load()){
@@ -238,15 +238,16 @@ void TxExecutor::write(uint64_t key) {
         getTimestamp();
 
         Tuple *tuple = get_tuple(Table, key);
-        //printf("GL Thid: %d CTHID: %d CTS: %ld\n", this->thid_,this->conflict_thid_ ,this->conflict_timestamp_.load());
          while ( true ) {
           if ((*rItr).rcdptr_->lock_.tryupgrade()) {
             break;
           }
-          // check if it is write or read lock for conflict MAY BE CAUSING DEADLOCK 
-          if (tuple->write_flag_ == true) {
-            // write conflict
-            this->conflict_thid_ = tuple->writer_thid_;
+          // check if it is write or read lock for conflict atomic load check if write lock is -1
+          // BANDAID fix WORK ON LATER
+          auto wlock_thid_ = write_locks[key].load(std::memory_order_relaxed);
+          if (wlock_thid_ != static_cast<unsigned long>(-1)) {
+            // write conflict 
+            this->conflict_thid_ = wlock_thid_;
             this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
           } else {
             // read conflict
@@ -318,9 +319,12 @@ void TxExecutor::write(uint64_t key) {
       }
       
       // check if it is write or read lock for conflict atomic load check if write lock is -1
-      if (tuple->write_flag_ == true) {
-        // write conflict
-        this->conflict_thid_ = tuple->writer_thid_;
+      // BANDAID fix WORK ON LATER
+      // SAME
+      auto wlock_thid_ = write_locks[key].load(std::memory_order_relaxed);
+      if (wlock_thid_ != static_cast<unsigned long>(-1)) {
+        // write conflict 
+        this->conflict_thid_ = wlock_thid_;
         this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
       } else {
         // read conflict
@@ -346,15 +350,14 @@ void TxExecutor::write(uint64_t key) {
       Pause();
     }
   }
-
+  // SAME
   /**
    * Register the contents to write lock list and write set.
    * Add to tuple
    */
   w_lock_list_.emplace_back(&tuple->lock_);
   write_set_.emplace_back(key, tuple);
-  tuple->write_flag_ = true;
-  tuple->writer_thid_ = this->thid_;
+  write_locks[key].store(this->thid_, std::memory_order_relaxed);
 
 FINISH_WRITE:
 #if ADD_ANALYSIS
@@ -384,10 +387,13 @@ void TxExecutor::readWrite(uint64_t key) {
           if ((*rItr).rcdptr_->lock_.tryupgrade()) {
             break;
           }
-          // check if it is write or read lock for conflict
-          if (tuple->write_flag_ == true) {
-            // write conflict
-            this->conflict_thid_ = tuple->writer_thid_;
+          // check if it is write or read lock for conflict atomic load check if write lock is -1
+          // BANDAID fix WORK ON LATER
+          // SAME
+          auto wlock_thid_ = write_locks[key].load(std::memory_order_relaxed);
+          if (wlock_thid_ != static_cast<unsigned long>(-1)) {
+            // write conflict 
+            this->conflict_thid_ = wlock_thid_;
             this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
           } else {
             // read conflict
@@ -413,6 +419,7 @@ void TxExecutor::readWrite(uint64_t key) {
           Pause();
         }
       }
+      //SAME
 
 
       // upgrade success
@@ -462,10 +469,13 @@ void TxExecutor::readWrite(uint64_t key) {
         break;
       }
       
-      // check if it is write or read lock for conflict
-      if (tuple->write_flag_ == true) {
-        // write conflict
-        this->conflict_thid_ = tuple->writer_thid_;
+      // check if it is write or read lock for conflict atomic load check if write lock is -1
+      // BANDAID fix WORK ON LATER
+      // SAME
+      auto wlock_thid_ = write_locks[key].load(std::memory_order_relaxed);
+      if (wlock_thid_ != static_cast<unsigned long>(-1)) {
+        // write conflict 
+        this->conflict_thid_ = wlock_thid_;
         this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
       } else {
         // read conflict
@@ -492,7 +502,7 @@ void TxExecutor::readWrite(uint64_t key) {
 
     }
   }
-
+  // SAME
   // read payload
   memcpy(this->return_val_, tuple->val_, VAL_SIZE);
   // finish read.
@@ -502,8 +512,7 @@ void TxExecutor::readWrite(uint64_t key) {
    */
   w_lock_list_.emplace_back(&tuple->lock_);
   write_set_.emplace_back(key, tuple);
-  tuple->write_flag_ = true;
-  tuple->writer_thid_ = this->thid_;
+  write_locks[key].store(this->thid_, std::memory_order_relaxed);
 
 FINISH_WRITE:
   return;
@@ -555,10 +564,7 @@ void TxExecutor::unlockList() {
     // clear write indicator
     int key = w_set_itr->key_;
     
-    Tuple *tuple = get_tuple(Table, key);
-    if (tuple) {
-      tuple->write_flag_ = false;
-    }
+    write_locks[key].store(-1, std::memory_order_relaxed);
 
     // unlock write_lock_
     (*w_lock_itr)->w_unlock();

@@ -95,6 +95,7 @@ RETRY:
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
 std::vector<std::atomic<uint64_t>> announce_timestamps(FLAGS_thread_num);
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* read_indicators;
+alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 
 int main(int argc, char *argv[]) try {
   gflags::SetUsageMessage("2PL benchmark.");
@@ -106,10 +107,14 @@ int main(int argc, char *argv[]) try {
   for (size_t i = 0; i < FLAGS_thread_num; i++) {
     announce_timestamps[i] = NO_TIMESTAMP;
   }
-
+  // wlocks setup [NUM_TUPLE]
+  write_locks = new std::atomic<uint64_t>[NUM_RI];
+  for (size_t i = 0; i < NUM_RI; i++){
+    write_locks[i].store(-1, std::memory_order_relaxed);
+  }
   // readIndicator setup [NUM_THREAD x NUM_TUPLE]
   read_indicators = new std::atomic<uint64_t>[NUM_RI_WORD];
-  for ( size_t i = 0; i < NUM_RI_WORD; i++) {
+  for (size_t i = 0; i < NUM_RI_WORD; i++) {
     read_indicators[i].store(0, std::memory_order_relaxed);
   }
 
@@ -129,6 +134,14 @@ int main(int argc, char *argv[]) try {
   storeRelease(quit, true);
 
   for (auto &th : thv) th.join();
+
+  // Deallocate memory for write_locks
+  delete[] write_locks;
+  write_locks = nullptr;
+
+  // Deallocate memory for read_indicators
+  delete[] read_indicators;
+  read_indicators = nullptr;
 
   for (unsigned int i = 0; i < FLAGS_thread_num; ++i) {
     SF2PLResult[0].addLocalAllResult(SF2PLResult[i]);
