@@ -100,7 +100,6 @@ void TxExecutor::commit() {
    * clear up local read and write set
    */
   unlockList();
-  //printf("CO THID: %d TS: %ld\n", this->thid_, this->thread_timestamp_.load());
   /**
    * Clean-up local variables
    */
@@ -120,7 +119,6 @@ void TxExecutor::commit() {
  */
 void TxExecutor::restart() {
   // Check TIMESTAMP if unlocked then move
-  //printf("RE Thid: %d TS: %ld CTHID: %d CTS: %ld\n", this->thid_, this->thread_timestamp_.load(), this->conflict_thid_ ,this->conflict_timestamp_.load());
   //retry loop
   while (this->conflict_timestamp_ == announce_timestamps[this->conflict_thid_]) {
     Pause();
@@ -173,7 +171,7 @@ void TxExecutor::read(uint64_t key) {
     r_lock_list_.emplace_back(&tuple->lock_);
     read_set_.emplace_back(key, tuple, tuple->val_);
     // switch the byte on the read indicator 
-    int index = key * MAX_THREADS + this->thid_;
+    int index = key * FLAGS_thread_num + this->thid_;
     read_indicators[index].store(1, std::memory_order_relaxed);
   } else {
     /**
@@ -187,7 +185,7 @@ void TxExecutor::read(uint64_t key) {
         r_lock_list_.emplace_back(&tuple->lock_);
         read_set_.emplace_back(key, tuple, tuple->val_);
         // switch the byte on the read indicator 
-        int index = key * MAX_THREADS + this->thid_;
+        int index = key * FLAGS_thread_num + this->thid_;
         read_indicators[index].store(1, std::memory_order_relaxed);
         break;
       }
@@ -242,27 +240,9 @@ void TxExecutor::write(uint64_t key) {
           if ((*rItr).rcdptr_->lock_.tryupgrade()) {
             break;
           }
-          // check if it is write or read lock for conflict atomic load check if write lock is -1
-          // BANDAID fix WORK ON LATER
-          auto wlock_thid_ = write_locks[key].load(std::memory_order_relaxed);
-          if (wlock_thid_ != static_cast<unsigned long>(-1)) {
-            // write conflict 
-            this->conflict_thid_ = wlock_thid_;
-            this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
-          } else {
-            // read conflict
-            // Check conflict threads and their timestamps based on reader_thid_ 
-            uint64_t index = key * MAX_THREADS;
-            for(uint64_t i = 0; i < MAX_THREADS; i++){
-              uint64_t current_index = index + i;
-              if (read_indicators[current_index].load(std::memory_order_relaxed) == 1) {
-                if(this->conflict_timestamp_ < announce_timestamps[i]){
-                  this->conflict_thid_ = i;
-                  this->conflict_timestamp_.store(announce_timestamps[i]);
-                }
-              }
-            }
-          }
+
+          // get conflict thid and timestamp
+          writeConflictTimestamp(key);
 
           // Check if timestamp is smaller
           if (this->conflict_timestamp_.load() < this->thread_timestamp_.load()){
@@ -312,35 +292,14 @@ void TxExecutor::write(uint64_t key) {
      */
 
     getTimestamp();
-    //printf("GL Thid: %d TS: %ld CTHID: %d CTS: %ld\n", this->thid_, this->thread_timestamp_.load(), this->conflict_thid_ ,this->conflict_timestamp_.load());
+
     while ( true ) {
       if (tuple->lock_.w_trylock()) {
         break;
       }
       
-      // check if it is write or read lock for conflict atomic load check if write lock is -1
-      // BANDAID fix WORK ON LATER
-      // SAME
-      auto wlock_thid_ = write_locks[key].load(std::memory_order_relaxed);
-      if (wlock_thid_ != static_cast<unsigned long>(-1)) {
-        // write conflict 
-        this->conflict_thid_ = wlock_thid_;
-        this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
-      } else {
-        // read conflict
-        // Check conflict threads and their timestamps based on reader_thid_ 
-        // set index to appropriate key for the thread
-        uint64_t index = key * MAX_THREADS;
-        for(uint64_t i = 0; i < MAX_THREADS; i++){
-          uint64_t current_index = index + i;
-          if (read_indicators[current_index].load(std::memory_order_relaxed) == 1) {
-            if(this->conflict_timestamp_ < announce_timestamps[i]){
-              this->conflict_thid_ = i;
-              this->conflict_timestamp_.store(announce_timestamps[i]);
-            }
-          }
-        }
-      }
+      // get conflict thid and timestamp
+      writeConflictTimestamp(key);
 
       // Check if timestamp is smaller 
       if (this->conflict_timestamp_.load() < this->thread_timestamp_.load()){
@@ -350,7 +309,7 @@ void TxExecutor::write(uint64_t key) {
       Pause();
     }
   }
-  // SAME
+
   /**
    * Register the contents to write lock list and write set.
    * Add to tuple
@@ -387,28 +346,8 @@ void TxExecutor::readWrite(uint64_t key) {
           if ((*rItr).rcdptr_->lock_.tryupgrade()) {
             break;
           }
-          // check if it is write or read lock for conflict atomic load check if write lock is -1
-          // BANDAID fix WORK ON LATER
-          // SAME
-          auto wlock_thid_ = write_locks[key].load(std::memory_order_relaxed);
-          if (wlock_thid_ != static_cast<unsigned long>(-1)) {
-            // write conflict 
-            this->conflict_thid_ = wlock_thid_;
-            this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
-          } else {
-            // read conflict
-            // Check conflict threads and their timestamps based on reader_thid_ 
-            uint64_t index = key * MAX_THREADS;
-            for(uint64_t i = 0; i < MAX_THREADS; i++){
-              uint64_t current_index = index + i;
-              if (read_indicators[current_index].load(std::memory_order_relaxed) == 1) {
-                if(this->conflict_timestamp_ < announce_timestamps[i]){
-                  this->conflict_thid_ = i;
-                  this->conflict_timestamp_.store(announce_timestamps[i]);
-                }
-              }
-            }
-          }
+          // get conflict thid and timestamp
+          writeConflictTimestamp(key);
 
           // Check if timestamp is smaller
           if (this->conflict_timestamp_.load() < this->thread_timestamp_.load()){
@@ -419,8 +358,6 @@ void TxExecutor::readWrite(uint64_t key) {
           Pause();
         }
       }
-      //SAME
-
 
       // upgrade success
       // remove old element of read set.
@@ -435,7 +372,7 @@ void TxExecutor::readWrite(uint64_t key) {
       }
       // remove from read_indicator 
       int key = (*rItr).key_;
-      int index = key * MAX_THREADS + this->thid_;
+      int index = key * FLAGS_thread_num + this->thid_;
       read_indicators[index].store(0,std::memory_order_relaxed);
 
       // remove from read_set_
@@ -469,28 +406,8 @@ void TxExecutor::readWrite(uint64_t key) {
         break;
       }
       
-      // check if it is write or read lock for conflict atomic load check if write lock is -1
-      // BANDAID fix WORK ON LATER
-      // SAME
-      auto wlock_thid_ = write_locks[key].load(std::memory_order_relaxed);
-      if (wlock_thid_ != static_cast<unsigned long>(-1)) {
-        // write conflict 
-        this->conflict_thid_ = wlock_thid_;
-        this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
-      } else {
-        // read conflict
-        // Check conflict threads and their timestamps based on reader_thid_ 
-        uint64_t index = key * MAX_THREADS;
-        for(uint64_t i = 0; i < MAX_THREADS; i++){
-          uint64_t current_index = index + i;
-          if (read_indicators[current_index].load(std::memory_order_relaxed) == 1) {
-            if(this->conflict_timestamp_ < announce_timestamps[i]){
-              this->conflict_thid_ = i;
-              this->conflict_timestamp_.store(announce_timestamps[i]);
-            }
-          }
-        }
-      }
+      // get conflict thid and timestamp
+      writeConflictTimestamp(key);
       
       // Check if timestamp is smaller
       if (this->conflict_timestamp_.load() < this->thread_timestamp_.load()){
@@ -502,7 +419,7 @@ void TxExecutor::readWrite(uint64_t key) {
 
     }
   }
-  // SAME
+
   // read payload
   memcpy(this->return_val_, tuple->val_, VAL_SIZE);
   // finish read.
@@ -517,6 +434,7 @@ void TxExecutor::readWrite(uint64_t key) {
 FINISH_WRITE:
   return;
 }
+
 /**
  * @brief Slow Path for 2PLSF
  * @return void
@@ -528,6 +446,34 @@ void TxExecutor::getTimestamp() {
     this->thread_timestamp_.store(conflict_clock.fetch_add(1));
     announce_timestamps[this->thid_].store(this->thread_timestamp_);
     assert(announce_timestamps[this->thid_] != NO_TIMESTAMP);
+  }
+}
+
+/**
+ * @brief write Slow Path
+ * @return void
+ */
+void TxExecutor::writeConflictTimestamp(uint64_t key) {
+  // check if it is write or read lock for conflict
+  // BANDAID fix WORK ON LATER
+  auto wlock_thid_ = write_locks[key].load(std::memory_order_relaxed);
+  if (wlock_thid_ != static_cast<unsigned long>(-1)) {
+    // WRITE CONFLICT
+    this->conflict_thid_ = wlock_thid_;
+    this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
+  } else {
+    // READ CONFLICT
+    // Check conflict threads and their timestamps based on reader_thid_ 
+    uint64_t index = key * FLAGS_thread_num;
+    for(uint64_t i = 0; i < FLAGS_thread_num; i++){
+      uint64_t current_index = index + i;
+      if (read_indicators[current_index].load(std::memory_order_relaxed) == 1) {
+        if(this->conflict_timestamp_ < announce_timestamps[i]){
+          this->conflict_thid_ = i;
+          this->conflict_timestamp_.store(announce_timestamps[i]);
+        }
+      }
+    }
   }
 }
 
@@ -547,7 +493,7 @@ void TxExecutor::unlockList() {
 
     // clear read_indicator byte
     int key = r_set_itr->key_;
-    int index = key * MAX_THREADS + this->thid_;
+    int index = key * FLAGS_thread_num + this->thid_;
     // Access global variables read_indicators and FLAG_thread_num.
     read_indicators[index].store(0, std::memory_order_relaxed);
     

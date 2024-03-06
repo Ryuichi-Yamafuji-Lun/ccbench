@@ -98,13 +98,18 @@ alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* read_indicators;
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 
 int main(int argc, char *argv[]) try {
-  gflags::SetUsageMessage("2PL benchmark.");
+  gflags::SetUsageMessage("2PLSF benchmark.");
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   chkArg();
   makeDB();
+  // set constants
+  static const uint64_t NUM_RI = FLAGS_tuple_num;
+
+  static const uint64_t NUM_RI_WORD = NUM_RI * FLAGS_thread_num;
   // Initialize announce_timstamps
   // set timestamps to the number of threads
   for (size_t i = 0; i < FLAGS_thread_num; i++) {
+    //heap buffer overflow
     announce_timestamps[i] = NO_TIMESTAMP;
   }
   // wlocks setup [NUM_TUPLE]

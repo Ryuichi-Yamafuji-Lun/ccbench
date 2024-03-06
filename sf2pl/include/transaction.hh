@@ -71,6 +71,8 @@ public:
 
   void getTimestamp();
 
+  void writeConflictTimestamp(uint64_t key);
+
   // inline
   Tuple *get_tuple(Tuple *table, uint64_t key) { return &table[key]; }
 

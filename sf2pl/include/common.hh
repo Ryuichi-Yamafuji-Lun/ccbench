@@ -57,15 +57,6 @@ DECLARE_double(zipf_skew);
 // Constant for No Timestamp (Cannot be 0 or errors will occur)
 static const uint64_t NO_TIMESTAMP = 0xFFFFFFFFFFFFFFFFULL;
 
-static const uint64_t MAX_THREADS = FLAGS_thread_num;
-
-static const uint64_t REGISTRY_MAX_THREADS = MAX_THREADS;
-
-// FLAGS_tuple_num max is 10???
-static const uint64_t NUM_RI = FLAGS_tuple_num;
-
-static const uint64_t NUM_RI_WORD = NUM_RI * MAX_THREADS;
-
 // GLOBAL 
 alignas(CACHE_LINE_SIZE) GLOBAL Tuple *Table;
 
