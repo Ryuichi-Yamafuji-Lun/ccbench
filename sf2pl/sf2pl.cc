@@ -127,6 +127,7 @@ int main(int argc, char *argv[]) try {
     sleepMs(1000);
   }
   storeRelease(quit, true);
+
   for (auto &th : thv) th.join();
 
   for (unsigned int i = 0; i < FLAGS_thread_num; ++i) {

@@ -34,9 +34,9 @@ DEFINE_uint64(max_ope, 10,
               "Total number of operations per single transaction.");
 DEFINE_bool(rmw, false,
             "True means read modify write, false means blind write.");
-DEFINE_uint64(rratio, 0, "read ratio of single transaction.");
-DEFINE_uint64(thread_num, 10, "Total number of worker threads.");
-DEFINE_uint64(tuple_num, 100, "Total number of records.");
+DEFINE_uint64(rratio, 100, "read ratio of single transaction.");
+DEFINE_uint64(thread_num, 64, "Total number of worker threads.");
+DEFINE_uint64(tuple_num, 10000000, "Total number of records.");
 DEFINE_bool(ycsb, true,
             "True uses zipf_skew, false uses faster random generator.");
 DEFINE_double(zipf_skew, 0, "zipf skew. 0 ~ 0.999...");

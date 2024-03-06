@@ -62,7 +62,7 @@ inline SetElement<Tuple> *TxExecutor::searchWriteSet(uint64_t key) {
  */
 void TxExecutor::abort() {
   /**
-   * Release locks and set announce timestamp to NO_TIMESTAMP
+   * Release locks
    */
   unlockList();
 
@@ -100,13 +100,18 @@ void TxExecutor::commit() {
    * clear up local read and write set
    */
   unlockList();
-  printf("CO THID: %d TS: %ld\n", this->thid_, this->thread_timestamp_.load());
+  //printf("CO THID: %d TS: %ld\n", this->thid_, this->thread_timestamp_.load());
   /**
    * Clean-up local variables
    */
   this->current_attempt_ = 0;
   this->thread_timestamp_.store(NO_TIMESTAMP);
   this->conflict_timestamp_.store(NO_TIMESTAMP);
+  /**
+   * Clear announceTS of thread
+   */
+  announce_timestamps[this->thid_].store(NO_TIMESTAMP);
+
 }
 
 /**
@@ -115,12 +120,9 @@ void TxExecutor::commit() {
  */
 void TxExecutor::restart() {
   // Check TIMESTAMP if unlocked then move
-  printf("RE Thid: %d TS: %ld CTHID: %d CTS: %ld\n", this->thid_, this->thread_timestamp_.load(), this->conflict_thid_ ,this->conflict_timestamp_.load());
-  while (true) {
-    if (this->conflict_timestamp_ != announce_timestamps[this->conflict_thid_]){
-      // retry the transaction
-      return;
-    }
+  //printf("RE Thid: %d TS: %ld CTHID: %d CTS: %ld\n", this->thid_, this->thread_timestamp_.load(), this->conflict_thid_ ,this->conflict_timestamp_.load());
+  //retry loop
+  while (this->conflict_timestamp_ == announce_timestamps[this->conflict_thid_]) {
     Pause();
   } 
 }
@@ -134,6 +136,7 @@ void TxExecutor::begin() {
   this->status_ = TransactionStatus::inFlight;
   // check if this is first attempt
   if (this->current_attempt_ > 0) {
+    // wait for conflict transaction to commit
     restart();
   }
   ++this->current_attempt_;
@@ -166,14 +169,6 @@ void TxExecutor::read(uint64_t key) {
   tuple = get_tuple(Table, key);
 #endif
 
-#ifdef DLR0
-  /**
-   * Acquire lock with wait.
-   */
-  tuple->lock_.r_lock();
-  r_lock_list_.emplace_back(&tuple->lock_);
-  read_set_.emplace_back(key, tuple, tuple->val_);
-#elif defined(DLR1)
   if (tuple->lock_.r_trylock()) {
     r_lock_list_.emplace_back(&tuple->lock_);
     read_set_.emplace_back(key, tuple, tuple->val_);
@@ -211,7 +206,6 @@ void TxExecutor::read(uint64_t key) {
     }
 
   }
-#endif
 
 FINISH_READ:
 #if ADD_ANALYSIS
@@ -236,9 +230,6 @@ void TxExecutor::write(uint64_t key) {
   // check to see if key is in read_set_
   for (auto rItr = read_set_.begin(); rItr != read_set_.end(); ++rItr) {
     if ((*rItr).key_ == key) {  // hit
-#if DLR0
-      (*rItr).rcdptr_->lock_.upgrade();
-#elif defined(DLR1)
       if (!(*rItr).rcdptr_->lock_.tryupgrade()) {
         /**
          * Slow Path
@@ -247,7 +238,7 @@ void TxExecutor::write(uint64_t key) {
         getTimestamp();
 
         Tuple *tuple = get_tuple(Table, key);
-        printf("GL Thid: %d CTHID: %d CTS: %ld\n", this->thid_,this->conflict_thid_ ,this->conflict_timestamp_.load());
+        //printf("GL Thid: %d CTHID: %d CTS: %ld\n", this->thid_,this->conflict_thid_ ,this->conflict_timestamp_.load());
          while ( true ) {
           if ((*rItr).rcdptr_->lock_.tryupgrade()) {
             break;
@@ -282,7 +273,6 @@ void TxExecutor::write(uint64_t key) {
           Pause();
         }
       }
-#endif
 
       // upgrade success
       // remove old element of read lock list.
@@ -314,12 +304,6 @@ void TxExecutor::write(uint64_t key) {
   tuple = get_tuple(Table, key);
 #endif
   
-#if DLR0
-  /**
-   * Lock with wait.
-   */
-  tuple->lock_.w_lock();
-#elif defined(DLR1)
   if (!tuple->lock_.w_trylock()) {
     
     /**
@@ -327,14 +311,13 @@ void TxExecutor::write(uint64_t key) {
      */
 
     getTimestamp();
-    printf("GL Thid: %d TS: %ld CTHID: %d CTS: %ld\n", this->thid_, this->thread_timestamp_.load(), this->conflict_thid_ ,this->conflict_timestamp_.load());
+    //printf("GL Thid: %d TS: %ld CTHID: %d CTS: %ld\n", this->thid_, this->thread_timestamp_.load(), this->conflict_thid_ ,this->conflict_timestamp_.load());
     while ( true ) {
       if (tuple->lock_.w_trylock()) {
-        // Cause of deadlock
         break;
       }
       
-      // check if it is write or read lock for conflict
+      // check if it is write or read lock for conflict atomic load check if write lock is -1
       if (tuple->write_flag_ == true) {
         // write conflict
         this->conflict_thid_ = tuple->writer_thid_;
@@ -363,7 +346,6 @@ void TxExecutor::write(uint64_t key) {
       Pause();
     }
   }
-#endif
 
   /**
    * Register the contents to write lock list and write set.
@@ -391,9 +373,6 @@ void TxExecutor::readWrite(uint64_t key) {
   // check to see if key is in read_set_
   for (auto rItr = read_set_.begin(); rItr != read_set_.end(); ++rItr) {
     if ((*rItr).key_ == key) {  // hit
-#if DLR0
-      (*rItr).rcdptr_->lock_.upgrade();
-#elif defined(DLR1)
       if (!(*rItr).rcdptr_->lock_.tryupgrade()) {
         /**
          * Slow Path
@@ -434,8 +413,7 @@ void TxExecutor::readWrite(uint64_t key) {
           Pause();
         }
       }
-      
-#endif
+
 
       // upgrade success
       // remove old element of read set.
@@ -472,12 +450,6 @@ void TxExecutor::readWrite(uint64_t key) {
   tuple = get_tuple(Table, key);
 #endif
 
-#if DLR0
-  /**
-   * Lock with wait.
-   */
-  tuple->lock_.w_lock();
-#elif defined(DLR1)
   if (!tuple->lock_.w_trylock()) {
     /**
      * Starvation freedom
@@ -520,7 +492,6 @@ void TxExecutor::readWrite(uint64_t key) {
 
     }
   }
-#endif
 
   // read payload
   memcpy(this->return_val_, tuple->val_, VAL_SIZE);
@@ -547,6 +518,7 @@ void TxExecutor::getTimestamp() {
     
     this->thread_timestamp_.store(conflict_clock.fetch_add(1));
     announce_timestamps[this->thid_].store(this->thread_timestamp_);
+    assert(announce_timestamps[this->thid_] != NO_TIMESTAMP);
   }
 }
 
@@ -561,26 +533,25 @@ void TxExecutor::unlockList() {
   auto w_lock_itr = w_lock_list_.begin();
   auto w_set_itr = write_set_.begin();
 
+  // read
   while (r_lock_itr != r_lock_list_.end() && r_set_itr != read_set_.end()) {
-    // unlock read_lock_
-    (*r_lock_itr)->r_unlock();
 
     // clear read_indicator byte
     int key = r_set_itr->key_;
     int index = key * MAX_THREADS + this->thid_;
     // Access global variables read_indicators and FLAG_thread_num.
     read_indicators[index].store(0, std::memory_order_relaxed);
+    
+    // unlock read_lock_
+    (*r_lock_itr)->r_unlock();
 
     // Increase itr
     ++r_lock_itr;
     ++r_set_itr;
   }
     
-
+  // write
   while (w_lock_itr != w_lock_list_.end() && w_set_itr != write_set_.end()) {
-    // unlock write_lock_
-    (*w_lock_itr)->w_unlock();
-
     // clear write indicator
     int key = w_set_itr->key_;
     
@@ -588,6 +559,9 @@ void TxExecutor::unlockList() {
     if (tuple) {
       tuple->write_flag_ = false;
     }
+
+    // unlock write_lock_
+    (*w_lock_itr)->w_unlock();
 
     // Increase itr
     ++w_lock_itr;
@@ -602,10 +576,6 @@ void TxExecutor::unlockList() {
   w_lock_list_.clear();
   read_set_.clear();
   write_set_.clear();
-  
-  /**
-   * Clear announceTS of thread
-   */
-  announce_timestamps[this->thid_].store(NO_TIMESTAMP);
+
 }
 

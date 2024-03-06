@@ -9,12 +9,19 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/sf2pl/build/sf2pl.exe",
-            "args": ["-thread_num=1"],
+            "args": ["-thread_num=2", "-tuple_num=12", "-rratio=0", "-extime=10"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "gdb"
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
         }
 
     ]
