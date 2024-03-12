@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/sf2pl/build/sf2pl.exe",
-            "args": ["-thread_num=100", "-tuple_num=100", "-rratio=0", "-extime=10"],
+            "args": ["-thread_num=2", "-tuple_num=1", "-rratio=0", "-extime=10"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

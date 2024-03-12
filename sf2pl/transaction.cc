@@ -119,7 +119,7 @@ void TxExecutor::commit() {
  */
 void TxExecutor::restart() {
   // Check TIMESTAMP if unlocked then move
-  //retry loop
+  // retry loop
   while (this->conflict_timestamp_ == announce_timestamps[this->conflict_thid_].load(std::memory_order_relaxed)) {
     Pause();
   } 
@@ -440,7 +440,7 @@ FINISH_WRITE:
  * @return void
  */
 void TxExecutor::getTimestamp() {
-  // Get timestamp if first time conflict
+  // If first time conflict get a timestamp
   if (this->thread_timestamp_ == NO_TIMESTAMP){
     
     this->thread_timestamp_.store(conflict_clock.fetch_add(1));
@@ -455,7 +455,6 @@ void TxExecutor::getTimestamp() {
  */
 void TxExecutor::writeConflictTimestamp(uint64_t key) {
   // check if it is write or read lock for conflict
-  // BANDAID fix WORK ON LATER
   auto wlock_thid_ = write_locks[key].load(std::memory_order_relaxed);
   if (wlock_thid_ != static_cast<unsigned long>(-1)) {
     // WRITE CONFLICT
@@ -488,13 +487,13 @@ void TxExecutor::unlockList() {
   auto w_lock_itr = w_lock_list_.begin();
   auto w_set_itr = write_set_.begin();
 
-  // read
+  // clear read_indicator byte
   while (r_lock_itr != r_lock_list_.end() && r_set_itr != read_set_.end()) {
-
-    // clear read_indicator byte
+    // Access Index
     int key = r_set_itr->key_;
     int index = key * FLAGS_thread_num + this->thid_;
-    // Access global variables read_indicators and FLAG_thread_num.
+
+    // Set indicator to 0
     read_indicators[index].store(0, std::memory_order_relaxed);
     
     // unlock read_lock_
@@ -505,11 +504,12 @@ void TxExecutor::unlockList() {
     ++r_set_itr;
   }
     
-  // write
+  // clear write indicator
   while (w_lock_itr != w_lock_list_.end() && w_set_itr != write_set_.end()) {
-    // clear write indicator
+    // Get key of index
     int key = w_set_itr->key_;
     
+    // set indicator to -1
     write_locks[key].store(-1, std::memory_order_relaxed);
 
     // unlock write_lock_

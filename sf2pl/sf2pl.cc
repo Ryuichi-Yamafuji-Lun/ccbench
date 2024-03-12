@@ -112,7 +112,6 @@ int main(int argc, char *argv[]) try {
   // set timestamps to the number of threads
   announce_timestamps = new std::atomic<uint64_t>[MAX_THREAD];
   for (size_t i = 0; i < MAX_THREAD; i++) {
-    //heap buffer overflow
     announce_timestamps[i].store(NO_TIMESTAMP, std::memory_order_relaxed);
   }
   // wlocks setup [NUM_TUPLE]
