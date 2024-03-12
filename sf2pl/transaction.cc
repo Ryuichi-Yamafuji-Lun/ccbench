@@ -109,7 +109,7 @@ void TxExecutor::commit() {
   /**
    * Clear announceTS of thread
    */
-  announce_timestamps[this->thid_].store(NO_TIMESTAMP);
+  announce_timestamps[this->thid_].store(NO_TIMESTAMP, std::memory_order_relaxed);
 
 }
 
@@ -120,7 +120,7 @@ void TxExecutor::commit() {
 void TxExecutor::restart() {
   // Check TIMESTAMP if unlocked then move
   //retry loop
-  while (this->conflict_timestamp_ == announce_timestamps[this->conflict_thid_]) {
+  while (this->conflict_timestamp_ == announce_timestamps[this->conflict_thid_].load(std::memory_order_relaxed)) {
     Pause();
   } 
 }
@@ -192,7 +192,7 @@ void TxExecutor::read(uint64_t key) {
       // Check conflict thread and conflict thread timestamp
       // writer thid because only writer will cause conflict
       this->conflict_thid_ = write_locks[key].load(std::memory_order_relaxed);
-      this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
+      this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_].load(std::memory_order_relaxed));
       // Check if timestamp is smaller
       if (this->conflict_timestamp_.load() < this->thread_timestamp_.load()){
         // Add the restart mechanism
@@ -444,8 +444,8 @@ void TxExecutor::getTimestamp() {
   if (this->thread_timestamp_ == NO_TIMESTAMP){
     
     this->thread_timestamp_.store(conflict_clock.fetch_add(1));
-    announce_timestamps[this->thid_].store(this->thread_timestamp_);
-    assert(announce_timestamps[this->thid_] != NO_TIMESTAMP);
+    announce_timestamps[this->thid_].store(this->thread_timestamp_, std::memory_order_relaxed);
+    assert(announce_timestamps[this->thid_].load(std::memory_order_relaxed) != NO_TIMESTAMP);
   }
 }
 
@@ -460,7 +460,7 @@ void TxExecutor::writeConflictTimestamp(uint64_t key) {
   if (wlock_thid_ != static_cast<unsigned long>(-1)) {
     // WRITE CONFLICT
     this->conflict_thid_ = wlock_thid_;
-    this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]);
+    this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_].load(std::memory_order_relaxed));
   } else {
     // READ CONFLICT
     // Check conflict threads and their timestamps based on reader_thid_ 
@@ -468,9 +468,9 @@ void TxExecutor::writeConflictTimestamp(uint64_t key) {
     for(uint64_t i = 0; i < FLAGS_thread_num; i++){
       uint64_t current_index = index + i;
       if (read_indicators[current_index].load(std::memory_order_relaxed) == 1) {
-        if(this->conflict_timestamp_ < announce_timestamps[i]){
+        if(this->conflict_timestamp_ < announce_timestamps[i].load(std::memory_order_relaxed)){
           this->conflict_thid_ = i;
-          this->conflict_timestamp_.store(announce_timestamps[i]);
+          this->conflict_timestamp_.store(announce_timestamps[i].load(std::memory_order_relaxed));
         }
       }
     }

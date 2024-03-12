@@ -63,7 +63,7 @@ alignas(CACHE_LINE_SIZE) GLOBAL Tuple *Table;
 // Add Conflict Clock
 extern std::atomic<uint64_t> conflict_clock;
 // Add global dynamic array of Announce Timestamp 
-extern std::vector<std::atomic<uint64_t>> announce_timestamps;
+extern std::atomic<uint64_t>* announce_timestamps;
 // Add readIndicator [NUM_TUPLE * MAX_THR]
 extern std::atomic<uint64_t>* read_indicators;
 // Add wlock [NUM_TUPLE]

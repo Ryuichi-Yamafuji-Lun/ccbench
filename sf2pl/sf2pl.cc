@@ -93,7 +93,7 @@ RETRY:
 
 // Global variables for sf2pl
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
-std::vector<std::atomic<uint64_t>> announce_timestamps(FLAGS_thread_num);
+alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* announce_timestamps;
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* read_indicators;
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 
@@ -105,12 +105,15 @@ int main(int argc, char *argv[]) try {
   // set constants
   static const uint64_t NUM_RI = FLAGS_tuple_num;
 
-  static const uint64_t NUM_RI_WORD = NUM_RI * FLAGS_thread_num;
+  static const uint64_t MAX_THREAD = FLAGS_thread_num;
+
+  static const uint64_t NUM_RI_WORD = NUM_RI * MAX_THREAD;
   // Initialize announce_timstamps
   // set timestamps to the number of threads
-  for (size_t i = 0; i < FLAGS_thread_num; i++) {
+  announce_timestamps = new std::atomic<uint64_t>[MAX_THREAD];
+  for (size_t i = 0; i < MAX_THREAD; i++) {
     //heap buffer overflow
-    announce_timestamps[i] = NO_TIMESTAMP;
+    announce_timestamps[i].store(NO_TIMESTAMP, std::memory_order_relaxed);
   }
   // wlocks setup [NUM_TUPLE]
   write_locks = new std::atomic<uint64_t>[NUM_RI];
@@ -140,13 +143,14 @@ int main(int argc, char *argv[]) try {
 
   for (auto &th : thv) th.join();
 
+  // Deallocate memory for announce_timestamps
+  delete[] announce_timestamps;
+
   // Deallocate memory for write_locks
   delete[] write_locks;
-  write_locks = nullptr;
 
   // Deallocate memory for read_indicators
   delete[] read_indicators;
-  read_indicators = nullptr;
 
   for (unsigned int i = 0; i < FLAGS_thread_num; ++i) {
     SF2PLResult[0].addLocalAllResult(SF2PLResult[i]);
