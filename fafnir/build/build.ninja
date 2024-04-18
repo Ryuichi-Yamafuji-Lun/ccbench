@@ -11,7 +11,7 @@
 # =============================================================================
 
 # =============================================================================
-# Project: ccbench_sf2pl
+# Project: ccbench_fafnir
 # Configuration: Release
 # =============================================================================
 
@@ -34,7 +34,7 @@ include rules.ninja
 # Utility command for rebuild_cache
 
 build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/ryuichilun/ccbench/sf2pl/build && /usr/bin/cmake -S/home/ryuichilun/ccbench/sf2pl -B/home/ryuichilun/ccbench/sf2pl/build
+  COMMAND = cd /home/ryuichilun/ccbench/fafnir/build && /usr/bin/cmake -S/home/ryuichilun/ccbench/fafnir -B/home/ryuichilun/ccbench/fafnir/build
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -46,7 +46,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/ryuichilun/ccbench/sf2pl/build && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  COMMAND = cd /home/ryuichilun/ccbench/fafnir/build && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
   DESC = No interactive CMake dialog available...
   restat = 1
 
@@ -57,7 +57,7 @@ build edit_cache: phony CMakeFiles/edit_cache.util
 # Utility command for test
 
 build CMakeFiles/test.util: CUSTOM_COMMAND
-  COMMAND = cd /home/ryuichilun/ccbench/sf2pl/build && /usr/bin/ctest --force-new-ctest-process
+  COMMAND = cd /home/ryuichilun/ccbench/fafnir/build && /usr/bin/ctest --force-new-ctest-process
   DESC = Running tests...
   pool = console
   restat = 1
@@ -65,76 +65,76 @@ build CMakeFiles/test.util: CUSTOM_COMMAND
 build test: phony CMakeFiles/test.util
 
 # =============================================================================
-# Object build statements for EXECUTABLE target sf2pl.exe
+# Object build statements for EXECUTABLE target fafnir.exe
 
 
 #############################################
-# Order-only phony target for sf2pl.exe
+# Order-only phony target for fafnir.exe
 
-build cmake_object_order_depends_target_sf2pl.exe: phony || CMakeFiles/sf2pl.exe.dir
+build cmake_object_order_depends_target_fafnir.exe: phony || CMakeFiles/fafnir.exe.dir
 
-build CMakeFiles/sf2pl.exe.dir/home/ryuichilun/ccbench/common/result.cc.o: CXX_COMPILER__sf2pl.2eexe /home/ryuichilun/ccbench/common/result.cc || cmake_object_order_depends_target_sf2pl.exe
+build CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/result.cc.o: CXX_COMPILER__fafnir.2eexe /home/ryuichilun/ccbench/common/result.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
-  DEP_FILE = CMakeFiles/sf2pl.exe.dir/home/ryuichilun/ccbench/common/result.cc.o.d
+  DEP_FILE = CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/result.cc.o.d
   FLAGS = -O3 -DNDEBUG   -std=c++17
-  OBJECT_DIR = CMakeFiles/sf2pl.exe.dir
-  OBJECT_FILE_DIR = CMakeFiles/sf2pl.exe.dir/home/ryuichilun/ccbench/common
+  OBJECT_DIR = CMakeFiles/fafnir.exe.dir
+  OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common
 
-build CMakeFiles/sf2pl.exe.dir/home/ryuichilun/ccbench/common/util.cc.o: CXX_COMPILER__sf2pl.2eexe /home/ryuichilun/ccbench/common/util.cc || cmake_object_order_depends_target_sf2pl.exe
+build CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/util.cc.o: CXX_COMPILER__fafnir.2eexe /home/ryuichilun/ccbench/common/util.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
-  DEP_FILE = CMakeFiles/sf2pl.exe.dir/home/ryuichilun/ccbench/common/util.cc.o.d
+  DEP_FILE = CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/util.cc.o.d
   FLAGS = -O3 -DNDEBUG   -std=c++17
-  OBJECT_DIR = CMakeFiles/sf2pl.exe.dir
-  OBJECT_FILE_DIR = CMakeFiles/sf2pl.exe.dir/home/ryuichilun/ccbench/common
+  OBJECT_DIR = CMakeFiles/fafnir.exe.dir
+  OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common
 
-build CMakeFiles/sf2pl.exe.dir/result.cc.o: CXX_COMPILER__sf2pl.2eexe ../result.cc || cmake_object_order_depends_target_sf2pl.exe
+build CMakeFiles/fafnir.exe.dir/fafnir.cc.o: CXX_COMPILER__fafnir.2eexe ../fafnir.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
-  DEP_FILE = CMakeFiles/sf2pl.exe.dir/result.cc.o.d
+  DEP_FILE = CMakeFiles/fafnir.exe.dir/fafnir.cc.o.d
   FLAGS = -O3 -DNDEBUG   -std=c++17
-  OBJECT_DIR = CMakeFiles/sf2pl.exe.dir
-  OBJECT_FILE_DIR = CMakeFiles/sf2pl.exe.dir
+  OBJECT_DIR = CMakeFiles/fafnir.exe.dir
+  OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir
 
-build CMakeFiles/sf2pl.exe.dir/sf2pl.cc.o: CXX_COMPILER__sf2pl.2eexe ../sf2pl.cc || cmake_object_order_depends_target_sf2pl.exe
+build CMakeFiles/fafnir.exe.dir/result.cc.o: CXX_COMPILER__fafnir.2eexe ../result.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
-  DEP_FILE = CMakeFiles/sf2pl.exe.dir/sf2pl.cc.o.d
+  DEP_FILE = CMakeFiles/fafnir.exe.dir/result.cc.o.d
   FLAGS = -O3 -DNDEBUG   -std=c++17
-  OBJECT_DIR = CMakeFiles/sf2pl.exe.dir
-  OBJECT_FILE_DIR = CMakeFiles/sf2pl.exe.dir
+  OBJECT_DIR = CMakeFiles/fafnir.exe.dir
+  OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir
 
-build CMakeFiles/sf2pl.exe.dir/transaction.cc.o: CXX_COMPILER__sf2pl.2eexe ../transaction.cc || cmake_object_order_depends_target_sf2pl.exe
+build CMakeFiles/fafnir.exe.dir/transaction.cc.o: CXX_COMPILER__fafnir.2eexe ../transaction.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
-  DEP_FILE = CMakeFiles/sf2pl.exe.dir/transaction.cc.o.d
+  DEP_FILE = CMakeFiles/fafnir.exe.dir/transaction.cc.o.d
   FLAGS = -O3 -DNDEBUG   -std=c++17
-  OBJECT_DIR = CMakeFiles/sf2pl.exe.dir
-  OBJECT_FILE_DIR = CMakeFiles/sf2pl.exe.dir
+  OBJECT_DIR = CMakeFiles/fafnir.exe.dir
+  OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir
 
-build CMakeFiles/sf2pl.exe.dir/util.cc.o: CXX_COMPILER__sf2pl.2eexe ../util.cc || cmake_object_order_depends_target_sf2pl.exe
+build CMakeFiles/fafnir.exe.dir/util.cc.o: CXX_COMPILER__fafnir.2eexe ../util.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
-  DEP_FILE = CMakeFiles/sf2pl.exe.dir/util.cc.o.d
+  DEP_FILE = CMakeFiles/fafnir.exe.dir/util.cc.o.d
   FLAGS = -O3 -DNDEBUG   -std=c++17
-  OBJECT_DIR = CMakeFiles/sf2pl.exe.dir
-  OBJECT_FILE_DIR = CMakeFiles/sf2pl.exe.dir
+  OBJECT_DIR = CMakeFiles/fafnir.exe.dir
+  OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir
 
 
 # =============================================================================
-# Link build statements for EXECUTABLE target sf2pl.exe
+# Link build statements for EXECUTABLE target fafnir.exe
 
 
 #############################################
-# Link the executable sf2pl.exe
+# Link the executable fafnir.exe
 
-build sf2pl.exe: CXX_EXECUTABLE_LINKER__sf2pl.2eexe CMakeFiles/sf2pl.exe.dir/home/ryuichilun/ccbench/common/result.cc.o CMakeFiles/sf2pl.exe.dir/home/ryuichilun/ccbench/common/util.cc.o CMakeFiles/sf2pl.exe.dir/result.cc.o CMakeFiles/sf2pl.exe.dir/sf2pl.cc.o CMakeFiles/sf2pl.exe.dir/transaction.cc.o CMakeFiles/sf2pl.exe.dir/util.cc.o | /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0 /usr/lib/x86_64-linux-gnu/libgflags.so ../../third_party/mimalloc/out/release/libmimalloc.a ../../third_party/masstree/libkohler_masstree_json.a
+build fafnir.exe: CXX_EXECUTABLE_LINKER__fafnir.2eexe CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/result.cc.o CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/util.cc.o CMakeFiles/fafnir.exe.dir/fafnir.cc.o CMakeFiles/fafnir.exe.dir/result.cc.o CMakeFiles/fafnir.exe.dir/transaction.cc.o CMakeFiles/fafnir.exe.dir/util.cc.o | /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0 /usr/lib/x86_64-linux-gnu/libgflags.so ../../third_party/mimalloc/out/release/libmimalloc.a ../../third_party/masstree/libkohler_masstree_json.a
   FLAGS = -O3 -DNDEBUG
   LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0  /usr/lib/x86_64-linux-gnu/libgflags.so  ../../third_party/mimalloc/out/release/libmimalloc.a  ../../third_party/masstree/libkohler_masstree_json.a  -lpthread
-  OBJECT_DIR = CMakeFiles/sf2pl.exe.dir
+  OBJECT_DIR = CMakeFiles/fafnir.exe.dir
   POST_BUILD = :
   PRE_LINK = :
-  TARGET_FILE = sf2pl.exe
-  TARGET_PDB = sf2pl.exe.dbg
+  TARGET_FILE = fafnir.exe
+  TARGET_PDB = fafnir.exe.dbg
 
 # =============================================================================
 # Write statements declared in CMakeLists.txt:
-# /home/ryuichilun/ccbench/sf2pl/CMakeLists.txt
+# /home/ryuichilun/ccbench/fafnir/CMakeLists.txt
 # =============================================================================
 
 
@@ -142,7 +142,7 @@ build sf2pl.exe: CXX_EXECUTABLE_LINKER__sf2pl.2eexe CMakeFiles/sf2pl.exe.dir/hom
 # Utility command for rebuild_cache
 
 build test/CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/ryuichilun/ccbench/sf2pl/build/test && /usr/bin/cmake -S/home/ryuichilun/ccbench/sf2pl -B/home/ryuichilun/ccbench/sf2pl/build
+  COMMAND = cd /home/ryuichilun/ccbench/fafnir/build/test && /usr/bin/cmake -S/home/ryuichilun/ccbench/fafnir -B/home/ryuichilun/ccbench/fafnir/build
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -154,7 +154,7 @@ build test/rebuild_cache: phony test/CMakeFiles/rebuild_cache.util
 # Utility command for edit_cache
 
 build test/CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/ryuichilun/ccbench/sf2pl/build/test && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  COMMAND = cd /home/ryuichilun/ccbench/fafnir/build/test && /usr/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
   DESC = No interactive CMake dialog available...
   restat = 1
 
@@ -165,7 +165,7 @@ build test/edit_cache: phony test/CMakeFiles/edit_cache.util
 # Utility command for test
 
 build test/CMakeFiles/test.util: CUSTOM_COMMAND
-  COMMAND = cd /home/ryuichilun/ccbench/sf2pl/build/test && /usr/bin/ctest --force-new-ctest-process
+  COMMAND = cd /home/ryuichilun/ccbench/fafnir/build/test && /usr/bin/ctest --force-new-ctest-process
   DESC = Running tests...
   pool = console
   restat = 1
@@ -257,14 +257,14 @@ build make_db_test: phony test/make_db_test
 # =============================================================================
 
 #############################################
-# Folder: /home/ryuichilun/ccbench/sf2pl/build
+# Folder: /home/ryuichilun/ccbench/fafnir/build
 
-build all: phony sf2pl.exe test/all
+build all: phony fafnir.exe test/all
 
 # =============================================================================
 
 #############################################
-# Folder: /home/ryuichilun/ccbench/sf2pl/build/test
+# Folder: /home/ryuichilun/ccbench/fafnir/build/test
 
 build test/all: phony test/make_db_test
 
