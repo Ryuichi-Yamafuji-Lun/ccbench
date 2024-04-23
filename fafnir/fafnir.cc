@@ -93,9 +93,8 @@ RETRY:
 
 // Global variables for fafnir
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
-// MAKE ANNOUNCE TIMESTAMP AND READ_INDICATORS FLEXIBLE
-alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* announce_timestamps;
-alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* read_indicators;
+alignas(CACHE_LINE_SIZE) std::vector<std::atomic<uint64_t>> announce_timestamps;
+alignas(CACHE_LINE_SIZE) std::vector<std::atomic<uint64_t>> read_indicators;
 // END HERE
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 
@@ -111,10 +110,10 @@ int main(int argc, char *argv[]) try {
 
   static const uint64_t NUM_RI_WORD = NUM_RI * INITIAL_THREAD;
   // Initialize announce_timstamps
-  // set timestamps to the number of initial threads
-  announce_timestamps = new std::atomic<uint64_t>[INITIAL_THREAD];
+  // Set timestamps to the number of initial threads
+  announce_timestamps.resize(INITIAL_THREAD);
   for (size_t i = 0; i < INITIAL_THREAD; i++) {
-    announce_timestamps[i].store(NO_TIMESTAMP, std::memory_order_relaxed);
+      announce_timestamps[i].store(NO_TIMESTAMP, std::memory_order_relaxed);
   }
   // wlocks setup [NUM_TUPLE]
   write_locks = new std::atomic<uint64_t>[NUM_RI];
@@ -122,9 +121,9 @@ int main(int argc, char *argv[]) try {
     write_locks[i].store(-1, std::memory_order_relaxed);
   }
   // readIndicator setup [NUM_THREAD x NUM_TUPLE]
-  read_indicators = new std::atomic<uint64_t>[NUM_RI_WORD];
-  for (size_t i = 0; i < NUM_RI_WORD; i++) {
-    read_indicators[i].store(0, std::memory_order_relaxed);
+  read_indicators.resize(INITIAL_THREAD);
+  for (size_t i = 0; i < INITIAL_THREAD; i++) {
+      read_indicators[i].store(NO_TIMESTAMP, std::memory_order_relaxed);
   }
 
   alignas(CACHE_LINE_SIZE) bool start = false;
@@ -144,14 +143,8 @@ int main(int argc, char *argv[]) try {
 
   for (auto &th : thv) th.join();
 
-  // Deallocate memory for announce_timestamps
-  delete[] announce_timestamps;
-
   // Deallocate memory for write_locks
   delete[] write_locks;
-
-  // Deallocate memory for read_indicators
-  delete[] read_indicators;
 
   for (unsigned int i = 0; i < FLAGS_thread_num; ++i) {
     FAFNIRResult[0].addLocalAllResult(FAFNIRResult[i]);

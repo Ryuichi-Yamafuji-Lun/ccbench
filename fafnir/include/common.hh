@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <vector>
 
 #include "../../include/cache_line_size.hh"
 #include "../../include/int64byte.hh"
@@ -61,11 +62,9 @@ alignas(CACHE_LINE_SIZE) GLOBAL Tuple *Table;
 
 // Add Conflict Clock
 extern std::atomic<uint64_t> conflict_clock;
-// EDIT MAKE FLEXIBLE
 // Add global dynamic array of Announce Timestamp 
-extern std::atomic<uint64_t>* announce_timestamps;
-// EDIT MAKE FLEXIBLE
+extern std::vector<std::atomic<uint64_t>> announce_timestamps;
 // Add readIndicator [NUM_TUPLE * MAX_THR] 
-extern std::atomic<uint64_t>* read_indicators;
+extern std::vector<std::atomic<uint64_t>> read_indicators;
 // Add wlock [NUM_TUPLE]
 extern std::atomic<uint64_t>* write_locks;
