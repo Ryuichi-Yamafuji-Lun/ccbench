@@ -36,7 +36,6 @@ DEFINE_bool(rmw, false,
             "True means read modify write, false means blind write.");
 DEFINE_uint64(rratio, 0, "read ratio of single transaction.");
 DEFINE_uint64(thread_num, 5, "Total number of worker threads.");
-// ERROR THIS CAUSES ERROR AS IT IS CONST SET TO WHATEVER TUPLE_NUM IS
 DEFINE_uint64(tuple_num, 10, "Total number of records.");
 DEFINE_bool(ycsb, true,
             "True uses zipf_skew, false uses faster random generator.");
@@ -62,9 +61,11 @@ alignas(CACHE_LINE_SIZE) GLOBAL Tuple *Table;
 
 // Add Conflict Clock
 extern std::atomic<uint64_t> conflict_clock;
+// EDIT MAKE FLEXIBLE
 // Add global dynamic array of Announce Timestamp 
 extern std::atomic<uint64_t>* announce_timestamps;
-// Add readIndicator [NUM_TUPLE * MAX_THR]
+// EDIT MAKE FLEXIBLE
+// Add readIndicator [NUM_TUPLE * MAX_THR] 
 extern std::atomic<uint64_t>* read_indicators;
 // Add wlock [NUM_TUPLE]
 extern std::atomic<uint64_t>* write_locks;

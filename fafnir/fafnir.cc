@@ -93,25 +93,27 @@ RETRY:
 
 // Global variables for fafnir
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
+// MAKE ANNOUNCE TIMESTAMP AND READ_INDICATORS FLEXIBLE
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* announce_timestamps;
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* read_indicators;
+// END HERE
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 
 int main(int argc, char *argv[]) try {
-  gflags::SetUsageMessage("2PLSF benchmark.");
+  gflags::SetUsageMessage("FafnirDT benchmark.");
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   chkArg();
   makeDB();
   // set constants
   static const uint64_t NUM_RI = FLAGS_tuple_num;
 
-  static const uint64_t MAX_THREAD = FLAGS_thread_num;
+  static const uint64_t INITIAL_THREAD = FLAGS_thread_num;
 
-  static const uint64_t NUM_RI_WORD = NUM_RI * MAX_THREAD;
+  static const uint64_t NUM_RI_WORD = NUM_RI * INITIAL_THREAD;
   // Initialize announce_timstamps
-  // set timestamps to the number of threads
-  announce_timestamps = new std::atomic<uint64_t>[MAX_THREAD];
-  for (size_t i = 0; i < MAX_THREAD; i++) {
+  // set timestamps to the number of initial threads
+  announce_timestamps = new std::atomic<uint64_t>[INITIAL_THREAD];
+  for (size_t i = 0; i < INITIAL_THREAD; i++) {
     announce_timestamps[i].store(NO_TIMESTAMP, std::memory_order_relaxed);
   }
   // wlocks setup [NUM_TUPLE]
