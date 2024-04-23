@@ -111,9 +111,9 @@ int main(int argc, char *argv[]) try {
   static const uint64_t NUM_RI_WORD = NUM_RI * INITIAL_THREAD;
   // Initialize announce_timstamps
   // Set timestamps to the number of initial threads
-  announce_timestamps.resize(INITIAL_THREAD);
+  announce_timestamps = std::vector<std::atomic<uint64_t>>(INITIAL_THREAD);
   for (size_t i = 0; i < INITIAL_THREAD; i++) {
-      announce_timestamps[i].store(NO_TIMESTAMP, std::memory_order_relaxed);
+      announce_timestamps[i] = NO_TIMESTAMP;
   }
   // wlocks setup [NUM_TUPLE]
   write_locks = new std::atomic<uint64_t>[NUM_RI];
@@ -121,9 +121,10 @@ int main(int argc, char *argv[]) try {
     write_locks[i].store(-1, std::memory_order_relaxed);
   }
   // readIndicator setup [NUM_THREAD x NUM_TUPLE]
-  read_indicators.resize(INITIAL_THREAD);
-  for (size_t i = 0; i < INITIAL_THREAD; i++) {
-      read_indicators[i].store(NO_TIMESTAMP, std::memory_order_relaxed);
+  read_indicators = std::vector<std::atomic<uint64_t>>(NUM_RI_WORD);
+  for (size_t i = 0; i < NUM_RI_WORD; i++) {
+      read_indicators[i] = NO_TIMESTAMP;
+
   }
 
   alignas(CACHE_LINE_SIZE) bool start = false;
