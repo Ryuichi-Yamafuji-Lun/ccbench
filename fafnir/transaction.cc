@@ -110,6 +110,10 @@ void TxExecutor::commit() {
    * Clear announceTS of thread
    */
   announce_timestamps[this->thid_].store(NO_TIMESTAMP, std::memory_order_relaxed);
+  /**
+   * Reset the timer 
+   */
+  timer.reset();
 
 }
 

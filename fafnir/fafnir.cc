@@ -96,6 +96,8 @@ alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
 alignas(CACHE_LINE_SIZE) std::vector<std::atomic<uint64_t>> announce_timestamps;
 alignas(CACHE_LINE_SIZE) std::vector<std::atomic<uint64_t>> read_indicators;
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
+// Initiate global timer
+GlobalTimer timer;
 
 int main(int argc, char *argv[]) try {
   gflags::SetUsageMessage("FafnirDT benchmark.");
@@ -125,9 +127,11 @@ int main(int argc, char *argv[]) try {
       read_indicators[i] = NO_TIMESTAMP;
 
   }
+  
+  // create the timer checking thread
 
-  // begin the global timer 
-  GlobalTimer timer;
+
+  // begin timer
   timer.start();
 
   alignas(CACHE_LINE_SIZE) bool start = false;
