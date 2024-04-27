@@ -8,6 +8,7 @@
 #include "../../include/int64byte.hh"
 #include "../../include/masstree_wrapper.hh"
 #include "tuple.hh"
+#include "global_timer.hh"
 
 #include "gflags/gflags.h"
 #include "glog/logging.h"
@@ -69,4 +70,4 @@ extern std::vector<std::atomic<uint64_t>> read_indicators;
 // wlock [NUM_TUPLE]
 extern std::atomic<uint64_t>* write_locks;
 // Long transaction tracker
-extern global_timer long_transaction_tracker;
+extern GlobalTimer timer;
