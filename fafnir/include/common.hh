@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <vector>
+#include <chrono>
 
 #include "../../include/cache_line_size.hh"
 #include "../../include/int64byte.hh"
@@ -59,12 +60,13 @@ static const uint64_t NO_TIMESTAMP = 0xFFFFFFFFFFFFFFFFULL;
 
 // GLOBAL 
 alignas(CACHE_LINE_SIZE) GLOBAL Tuple *Table;
-
-// Add Conflict Clock
+// Conflict Clock
 extern std::atomic<uint64_t> conflict_clock;
-// Add global dynamic array of Announce Timestamp 
+// global dynamic array of Announce Timestamp 
 extern std::vector<std::atomic<uint64_t>> announce_timestamps;
-// Add readIndicator [NUM_TUPLE * MAX_THR] 
+// readIndicator [NUM_TUPLE * MAX_THR] 
 extern std::vector<std::atomic<uint64_t>> read_indicators;
-// Add wlock [NUM_TUPLE]
+// wlock [NUM_TUPLE]
 extern std::atomic<uint64_t>* write_locks;
+// Long transaction tracker
+extern global_timer long_transaction_tracker;

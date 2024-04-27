@@ -95,8 +95,41 @@ RETRY:
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
 alignas(CACHE_LINE_SIZE) std::vector<std::atomic<uint64_t>> announce_timestamps;
 alignas(CACHE_LINE_SIZE) std::vector<std::atomic<uint64_t>> read_indicators;
-// END HERE
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
+
+// Global Timer for long transaction checking
+class global_timer{
+  private:
+    std::atomic<bool> active;
+    std::atomic<std::chrono::steady_clock::time_point> start_time;
+  public:
+    // Set global_timer
+    global_timer(): active(false), start_time(std::chrono::steady_clock::now()) {}
+
+    // Begin global_timer
+    void start() {
+      active = true;
+      start_time.store(std::chrono::steady_clock::now());
+    }
+
+    // Stop global_timer
+    void stop() {
+      active = false;
+    }
+
+    // Reset global_timer to 0
+    void reset() {
+      start_time.store(std::chrono::steady_clock::now());
+    }
+
+    // Elapsed Time in milliseconds
+    std::chrono::milliseconds elapsed() const {
+      auto endTime = std::chrono::steady_clock::now();
+      auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - start_time.load());
+      return duration;
+    }
+
+};
 
 int main(int argc, char *argv[]) try {
   gflags::SetUsageMessage("FafnirDT benchmark.");
