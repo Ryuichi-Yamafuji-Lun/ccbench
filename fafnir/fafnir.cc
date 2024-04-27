@@ -98,6 +98,21 @@ alignas(CACHE_LINE_SIZE) std::vector<std::atomic<uint64_t>> read_indicators;
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 // Initiate global timer
 GlobalTimer timer;
+std::atomic<bool> timer_thread_active(true);
+
+// Check for long transactions
+void TimerCheckerThread() {
+  while (timer_thread_active) {
+
+    // Check for long transactions over 40ms
+    if (timer.elapsed() > std::chrono::milliseconds(40)){
+      std::cout << "y" << std::endl;
+    }
+
+    // Sleep for 40ms
+    std::this_thread::sleep_for(std::chrono::milliseconds(40));
+  }
+}
 
 int main(int argc, char *argv[]) try {
   gflags::SetUsageMessage("FafnirDT benchmark.");
@@ -133,6 +148,7 @@ int main(int argc, char *argv[]) try {
 
   // begin timer
   timer.start();
+  std::thread timer_thread(TimerCheckerThread);
 
   alignas(CACHE_LINE_SIZE) bool start = false;
   alignas(CACHE_LINE_SIZE) bool quit = false;
@@ -152,6 +168,8 @@ int main(int argc, char *argv[]) try {
   for (auto &th : thv) th.join();
   // end work
   // stop global_timer
+  timer_thread_active = false;
+  timer_thread.join();
   timer.stop();
 
   // Deallocate memory for write_locks
