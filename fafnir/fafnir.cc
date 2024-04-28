@@ -109,6 +109,12 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
       // Dynamically add a new worker thread
       std::thread newThread(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
       thv.push_back(std::move(newThread));
+
+      // Add Thread to announce timestamp
+      announce_timestamps.push_back(NO_TIMESTAMP);
+
+
+
     }
 
     // Sleep for 40ms
