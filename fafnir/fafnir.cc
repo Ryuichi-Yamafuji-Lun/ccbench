@@ -101,12 +101,14 @@ GlobalTimer timer;
 std::atomic<bool> timer_thread_active(true);
 
 // Check for long transactions
-void TimerCheckerThread() {
+void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys, bool& start, bool& quit) {
   while (timer_thread_active) {
 
     // Check for long transactions over 40ms
     if (timer.elapsed() > std::chrono::milliseconds(40)){
-      std::cout << "y" << std::endl;
+      // Dynamically add a new worker thread
+      std::thread newThread(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
+      thv.push_back(std::move(newThread));
     }
 
     // Sleep for 40ms
@@ -140,15 +142,7 @@ int main(int argc, char *argv[]) try {
   read_indicators = std::vector<std::atomic<uint64_t>>(NUM_RI_WORD);
   for (size_t i = 0; i < NUM_RI_WORD; i++) {
       read_indicators[i] = NO_TIMESTAMP;
-
   }
-  
-  // create the timer checking thread
-
-
-  // begin timer
-  timer.start();
-  std::thread timer_thread(TimerCheckerThread);
 
   alignas(CACHE_LINE_SIZE) bool start = false;
   alignas(CACHE_LINE_SIZE) bool quit = false;
@@ -159,6 +153,9 @@ int main(int argc, char *argv[]) try {
     thv.emplace_back(worker, i, std::ref(readys[i]), std::ref(start),
                      std::ref(quit));
   waitForReady(readys);
+  // begin timer
+  timer.start();
+  std::thread timer_thread(TimerCheckerThread, std::ref(thv), std::ref(readys), std::ref(start), std::ref(quit));
   storeRelease(start, true);
   for (size_t i = 0; i < FLAGS_extime; ++i) {
     sleepMs(1000);
