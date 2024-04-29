@@ -67,7 +67,7 @@ extern std::atomic<uint64_t> conflict_clock;
 // global dynamic array of Announce Timestamp 
 extern std::vector<std::unique_ptr<std::atomic<uint64_t>>> announce_timestamps;
 // readIndicator [NUM_TUPLE * MAX_THR] 
-extern std::vector<std::atomic<uint64_t>> read_indicators;
+extern std::vector<std::unique_ptr<std::atomic<uint64_t>>> read_indicators;
 // wlock [NUM_TUPLE]
 extern std::atomic<uint64_t>* write_locks;
 // Long transaction tracker

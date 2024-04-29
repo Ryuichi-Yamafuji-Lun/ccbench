@@ -176,7 +176,7 @@ void TxExecutor::read(uint64_t key) {
     read_set_.emplace_back(key, tuple, tuple->val_);
     // switch the byte on the read indicator 
     int index = key * FLAGS_thread_num + this->thid_;
-    read_indicators[index].store(1, std::memory_order_relaxed);
+    read_indicators[index]->store(1, std::memory_order_relaxed);
   } else {
     /**
      * Slow Path
@@ -190,7 +190,7 @@ void TxExecutor::read(uint64_t key) {
         read_set_.emplace_back(key, tuple, tuple->val_);
         // switch the byte on the read indicator 
         int index = key * FLAGS_thread_num + this->thid_;
-        read_indicators[index].store(1, std::memory_order_relaxed);
+        read_indicators[index]->store(1, std::memory_order_relaxed);
         break;
       }
       // Check conflict thread and conflict thread timestamp
@@ -377,7 +377,7 @@ void TxExecutor::readWrite(uint64_t key) {
       // remove from read_indicator 
       int key = (*rItr).key_;
       int index = key * FLAGS_thread_num + this->thid_;
-      read_indicators[index].store(0,std::memory_order_relaxed);
+      read_indicators[index]->store(0,std::memory_order_relaxed);
 
       // remove from read_set_
       read_set_.erase(rItr);
@@ -470,7 +470,7 @@ void TxExecutor::writeConflictTimestamp(uint64_t key) {
     uint64_t index = key * FLAGS_thread_num;
     for(uint64_t i = 0; i < FLAGS_thread_num; i++){
       uint64_t current_index = index + i;
-      if (read_indicators[current_index].load(std::memory_order_relaxed) == 1) {
+      if (read_indicators[current_index]->load(std::memory_order_relaxed) == 1) {
         if(this->conflict_timestamp_ < announce_timestamps[i]->load(std::memory_order_relaxed)){
           this->conflict_thid_ = i;
           this->conflict_timestamp_.store(announce_timestamps[i]->load(std::memory_order_relaxed));
@@ -498,7 +498,7 @@ void TxExecutor::unlockList() {
     int index = key * FLAGS_thread_num + this->thid_;
 
     // Set indicator to 0
-    read_indicators[index].store(0, std::memory_order_relaxed);
+    read_indicators[index]->store(0, std::memory_order_relaxed);
     
     // unlock read_lock_
     (*r_lock_itr)->r_unlock();

@@ -94,7 +94,7 @@ RETRY:
 // Global variables for fafnir
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
 alignas(CACHE_LINE_SIZE) std::vector<std::unique_ptr<std::atomic<uint64_t>>> announce_timestamps;
-alignas(CACHE_LINE_SIZE) std::vector<std::atomic<uint64_t>> read_indicators;
+alignas(CACHE_LINE_SIZE) std::vector<std::unique_ptr<std::atomic<uint64_t>>> read_indicators;
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 // Initiate global timer
 GlobalTimer timer;
@@ -158,9 +158,9 @@ int main(int argc, char *argv[]) try {
     write_locks[i].store(-1, std::memory_order_relaxed);
   }
   // readIndicator setup [NUM_THREAD x NUM_TUPLE]
-  read_indicators = std::vector<std::atomic<uint64_t>>(NUM_RI_WORD);
+  read_indicators.resize(NUM_RI_WORD);
   for (size_t i = 0; i < NUM_RI_WORD; i++) {
-      read_indicators[i] = NO_TIMESTAMP;
+      read_indicators[i] = std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP);
   }
 
   alignas(CACHE_LINE_SIZE) bool start = false;
