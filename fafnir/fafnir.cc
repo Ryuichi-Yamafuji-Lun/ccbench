@@ -99,13 +99,14 @@ alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 // Initiate global timer
 GlobalTimer timer;
 std::atomic<bool> timer_thread_active(true);
+static const uint64_t pause_timer = 30;
 
 // Check for long transactions
 void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys, bool& start, bool& quit) {
   while (timer_thread_active) {
 
     // Check for long transactions over 40ms
-    if (timer.elapsed() > std::chrono::milliseconds(40)){
+    if (timer.elapsed() > std::chrono::milliseconds(pause_timer)){
       // Dynamically add a new worker thread
       std::thread newThread(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
       thv.push_back(std::move(newThread));
@@ -130,7 +131,7 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
     }
 
     // Sleep for 40ms
-    std::this_thread::sleep_for(std::chrono::milliseconds(40));
+    std::this_thread::sleep_for(std::chrono::milliseconds(pause_timer));
   }
 }
 
