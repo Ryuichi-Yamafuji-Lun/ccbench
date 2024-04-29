@@ -93,7 +93,7 @@ RETRY:
 
 // Global variables for fafnir
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
-alignas(CACHE_LINE_SIZE) std::vector<std::atomic<uint64_t>> announce_timestamps;
+alignas(CACHE_LINE_SIZE) std::vector<std::unique_ptr<std::atomic<uint64_t>>> announce_timestamps;
 alignas(CACHE_LINE_SIZE) std::vector<std::atomic<uint64_t>> read_indicators;
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 // Initiate global timer
@@ -111,9 +111,22 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
       thv.push_back(std::move(newThread));
 
       // Add Thread to announce timestamp
-      announce_timestamps.push_back(NO_TIMESTAMP);
+      announce_timestamps.resize(thv.size());
+      announce_timestamps[FLAGS_thread_num] = std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP);
 
 
+      // // Add Thread to readIndicator
+      // uint64_t NEW_NUM_RI_WORD = FLAGS_tuple_num * thv.size();
+      // read_indicators.resize(NEW_NUM_RI_WORD);
+      // std::atomic<uint64_t> ATOMIC_NO_TIMESTAMP(NO_TIMESTAMP);
+
+      // for(size_t i = 0; i < FLAGS_tuple_num; ++i) {
+      //   auto index = i * (FLAGS_thread_num + i) + FLAGS_thread_num;
+      //   read_indicators.insert(read_indicators.begin() + index, ATOMIC_NO_TIMESTAMP);
+      // }
+
+      // // update thread size
+      FLAGS_thread_num = thv.size();
 
     }
 
@@ -135,9 +148,9 @@ int main(int argc, char *argv[]) try {
   static const uint64_t NUM_RI_WORD = NUM_RI * INITIAL_THREAD;
   // Initialize announce_timstamps
   // Set timestamps to the number of initial threads
-  announce_timestamps = std::vector<std::atomic<uint64_t>>(INITIAL_THREAD);
+  announce_timestamps.resize(INITIAL_THREAD);
   for (size_t i = 0; i < INITIAL_THREAD; i++) {
-      announce_timestamps[i] = NO_TIMESTAMP;
+      announce_timestamps[i] = std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP);
   }
   // wlocks setup [NUM_TUPLE]
   write_locks = new std::atomic<uint64_t>[NUM_RI];

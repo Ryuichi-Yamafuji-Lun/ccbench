@@ -4,11 +4,12 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+    
         {
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/sf2pl/build/sf2pl.exe",
+            "program": "${workspaceFolder}/fafnir/build/fafnir.exe",
             "args": ["-thread_num=2", "-tuple_num=1", "-rratio=0", "-extime=10"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
