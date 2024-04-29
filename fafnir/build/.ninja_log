@@ -52,3 +52,7 @@
 2856	2978	1714368742691095265	fafnir.exe	be41dedeb9b292e6
 5	3825	1714368743539092905	test/CMakeFiles/make_db_test.dir/make_db_test.cpp.o	5b1f788771ffe5f0
 3825	4065	1714368743779092237	test/make_db_test	f8f8df69ddfcad63
+5	2943	1714369582176642070	CMakeFiles/fafnir.exe.dir/fafnir.cc.o	67889e592d33615c
+2944	3060	1714369582292641720	fafnir.exe	be41dedeb9b292e6
+6	3726	1714369582960639706	test/CMakeFiles/make_db_test.dir/make_db_test.cpp.o	5b1f788771ffe5f0
+3726	3949	1714369583180639043	test/make_db_test	f8f8df69ddfcad63
