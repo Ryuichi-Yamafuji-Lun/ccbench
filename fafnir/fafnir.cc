@@ -107,13 +107,13 @@ std::mutex mtx;
 // Check for long transactions
 void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys, bool& start, bool& quit) {
   while (timer_thread_active) {
-
-    // Check for long transactions over 40ms
+    
+    // Check for long transactions over x ms
     if (timer.elapsed() > std::chrono::milliseconds(pause_timer)){
 
       // Acquire Lock
       std::lock_guard<std::mutex> lock(mtx);
-
+      
       // Add Thread to announce timestamp
       announce_timestamps.resize(FLAGS_thread_num + 1);
       announce_timestamps[FLAGS_thread_num] = std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP);
@@ -127,11 +127,12 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
         read_indicators.insert(read_indicators.begin() + insert_index,std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP));
       }
       // Dynamically add a new worker thread
-      std::thread newThread(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
-      thv.push_back(std::move(newThread));
-      // update thread size
-      FLAGS_thread_num += 1;
+      // SOURCE OF SEG FAULT
+      // readys.resize(thv.size() + 1);
+      // thv.emplace_back(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
 
+      // update thread size
+      FLAGS_thread_num = thv.size() + 1;
     }
 
     // Sleep for long transaction time
