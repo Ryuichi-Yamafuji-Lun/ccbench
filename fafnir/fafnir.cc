@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>  //string
 #include <thread>
+#include <mutex>
 
 #define GLOBAL_VALUE_DEFINE
 
@@ -98,8 +99,10 @@ alignas(CACHE_LINE_SIZE) std::vector<std::unique_ptr<std::atomic<uint64_t>>> rea
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 // Initiate global timer
 GlobalTimer timer;
-std::atomic<bool> timer_thread_active(true);
+bool timer_thread_active = true;
 static const uint64_t pause_timer = 30;
+
+std::mutex mtx;
 
 // Check for long transactions
 void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys, bool& start, bool& quit) {
@@ -107,30 +110,31 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
 
     // Check for long transactions over 40ms
     if (timer.elapsed() > std::chrono::milliseconds(pause_timer)){
-      // Dynamically add a new worker thread
-      std::thread newThread(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
-      thv.push_back(std::move(newThread));
+
+      // Acquire Lock
+      std::lock_guard<std::mutex> lock(mtx);
 
       // Add Thread to announce timestamp
-      announce_timestamps.resize(thv.size());
-      announce_timestamps[thv.size() - 1] = std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP);
-
+      announce_timestamps.resize(FLAGS_thread_num + 1);
+      announce_timestamps[FLAGS_thread_num] = std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP);
 
       // Add Thread to readIndicator
-      uint64_t NEW_NUM_RI_WORD = FLAGS_tuple_num * thv.size();
+      uint64_t NEW_NUM_RI_WORD = FLAGS_tuple_num * (FLAGS_thread_num + 1);
       read_indicators.resize(NEW_NUM_RI_WORD);
 
       for(size_t i = 0; i < FLAGS_tuple_num; ++i) {
-        auto insert_index = (i + 1) * (thv.size());
+        auto insert_index = (i + 1) * FLAGS_thread_num + i;
         read_indicators.insert(read_indicators.begin() + insert_index,std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP));
       }
-
+      // Dynamically add a new worker thread
+      std::thread newThread(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
+      thv.push_back(std::move(newThread));
       // update thread size
-      FLAGS_thread_num = thv.size();
+      FLAGS_thread_num += 1;
 
     }
 
-    // Sleep for 40ms
+    // Sleep for long transaction time
     std::this_thread::sleep_for(std::chrono::milliseconds(pause_timer));
   }
 }
@@ -186,7 +190,6 @@ int main(int argc, char *argv[]) try {
   // stop global_timer
   timer_thread_active = false;
   timer_thread.join();
-  timer.stop();
 
   // Deallocate memory for write_locks
   delete[] write_locks;
