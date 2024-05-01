@@ -99,7 +99,7 @@ alignas(CACHE_LINE_SIZE) std::vector<std::unique_ptr<std::atomic<uint64_t>>> rea
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 // Initiate global timer
 GlobalTimer timer;
-static const uint64_t pause_timer = 30;
+static const uint64_t pause_timer = 100;
 
 std::mutex mtx;
 
@@ -111,10 +111,8 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
   }
 
   while (!quit) {
-    
     // Check for long transactions over x ms
     if (timer.elapsed() > std::chrono::milliseconds(pause_timer)){
-
       // Acquire Lock
       std::lock_guard<std::mutex> lock(mtx);
       
@@ -122,7 +120,7 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
       announce_timestamps.resize(FLAGS_thread_num + 1);
       announce_timestamps[FLAGS_thread_num] = std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP);
 
-      // // Add Thread to readIndicator
+      // Add Thread to readIndicator
       uint64_t NEW_NUM_RI_WORD = FLAGS_tuple_num * (FLAGS_thread_num + 1);
       read_indicators.resize(NEW_NUM_RI_WORD);
 
@@ -135,7 +133,7 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
       thv.emplace_back(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
 
       // update thread size
-      FLAGS_thread_num = thv.size() + 1;
+      FLAGS_thread_num = thv.size();
     }
 
     // Sleep for long transaction time

@@ -226,6 +226,12 @@ void TxExecutor::write(uint64_t key) {
 #if ADD_ANALYSIS
   uint64_t start = rdtscp();
 #endif
+  // simulate short/long transaction
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(0, 300);
+  int sleep_duration = dis(gen);
+  std::this_thread::sleep_for(std::chrono::milliseconds(sleep_duration));
   // if it already wrote the key object once.
   if (searchWriteSet(key)) goto FINISH_WRITE;
   
