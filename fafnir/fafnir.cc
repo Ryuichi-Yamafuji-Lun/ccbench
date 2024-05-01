@@ -99,14 +99,18 @@ alignas(CACHE_LINE_SIZE) std::vector<std::unique_ptr<std::atomic<uint64_t>>> rea
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 // Initiate global timer
 GlobalTimer timer;
-bool timer_thread_active = true;
 static const uint64_t pause_timer = 30;
 
 std::mutex mtx;
 
 // Check for long transactions
 void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys, bool& start, bool& quit) {
-  while (timer_thread_active) {
+  while (!start) {
+    // Wait until the start flag is set
+    std::this_thread::yield();
+  }
+
+  while (!quit) {
     
     // Check for long transactions over x ms
     if (timer.elapsed() > std::chrono::milliseconds(pause_timer)){
@@ -118,7 +122,7 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
       announce_timestamps.resize(FLAGS_thread_num + 1);
       announce_timestamps[FLAGS_thread_num] = std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP);
 
-      // Add Thread to readIndicator
+      // // Add Thread to readIndicator
       uint64_t NEW_NUM_RI_WORD = FLAGS_tuple_num * (FLAGS_thread_num + 1);
       read_indicators.resize(NEW_NUM_RI_WORD);
 
@@ -127,9 +131,8 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
         read_indicators.insert(read_indicators.begin() + insert_index,std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP));
       }
       // Dynamically add a new worker thread
-      // SOURCE OF SEG FAULT
-      // readys.resize(thv.size() + 1);
-      // thv.emplace_back(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
+      readys.resize(thv.size() + 1);
+      thv.emplace_back(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
 
       // update thread size
       FLAGS_thread_num = thv.size() + 1;
@@ -177,19 +180,18 @@ int main(int argc, char *argv[]) try {
     thv.emplace_back(worker, i, std::ref(readys[i]), std::ref(start),
                      std::ref(quit));
   waitForReady(readys);
-  // begin timer
-  timer.start();
+
   std::thread timer_thread(TimerCheckerThread, std::ref(thv), std::ref(readys), std::ref(start), std::ref(quit));
+  // Begin Timer
+  timer.start();
+  // Start Work
   storeRelease(start, true);
   for (size_t i = 0; i < FLAGS_extime; ++i) {
     sleepMs(1000);
   }
+  // End Work
   storeRelease(quit, true);
-
   for (auto &th : thv) th.join();
-  // end work
-  // stop global_timer
-  timer_thread_active = false;
   timer_thread.join();
 
   // Deallocate memory for write_locks
