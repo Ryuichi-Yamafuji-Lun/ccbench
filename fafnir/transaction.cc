@@ -65,9 +65,8 @@ void TxExecutor::abort() {
    * Release locks
    */
   unlockList();
-
+  
   ++sres_->local_abort_counts_;
-
 #if BACK_OFF
 #if ADD_ANALYSIS
   uint64_t start(rdtscp());
@@ -124,6 +123,7 @@ void TxExecutor::commit() {
 void TxExecutor::restart() {
   // Check TIMESTAMP if unlocked then move
   // retry loop
+  // error
   while (this->conflict_timestamp_ == announce_timestamps[this->conflict_thid_]->load(std::memory_order_relaxed)) {
     Pause();
   } 
@@ -468,7 +468,9 @@ void TxExecutor::writeConflictTimestamp(uint64_t key) {
   auto wlock_thid_ = write_locks[key].load(std::memory_order_relaxed);
   if (wlock_thid_ != static_cast<unsigned long>(-1)) {
     // WRITE CONFLICT
+    //std::lock_guard<std::mutex> lock(mtx);
     this->conflict_thid_ = wlock_thid_;
+    // Error here
     this->conflict_timestamp_.store(announce_timestamps[this->conflict_thid_]->load(std::memory_order_relaxed));
   } else {
     // READ CONFLICT
@@ -502,7 +504,6 @@ void TxExecutor::unlockList() {
     // Access Index
     int key = r_set_itr->key_;
     int index = key * FLAGS_thread_num + this->thid_;
-
     // Set indicator to 0
     read_indicators[index]->store(0, std::memory_order_relaxed);
     
@@ -513,7 +514,7 @@ void TxExecutor::unlockList() {
     ++r_lock_itr;
     ++r_set_itr;
   }
-    
+
   // clear write indicator
   while (w_lock_itr != w_lock_list_.end() && w_set_itr != write_set_.end()) {
     // Get key of index

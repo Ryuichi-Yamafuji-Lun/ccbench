@@ -10,7 +10,7 @@
 #include <iostream>
 #include <string>  //string
 #include <thread>
-#include <mutex>
+
 
 #define GLOBAL_VALUE_DEFINE
 
@@ -94,13 +94,12 @@ RETRY:
 
 // Global variables for fafnir
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
-alignas(CACHE_LINE_SIZE) std::vector<std::unique_ptr<std::atomic<uint64_t>>> announce_timestamps;
-alignas(CACHE_LINE_SIZE) std::vector<std::unique_ptr<std::atomic<uint64_t>>> read_indicators;
+alignas(CACHE_LINE_SIZE) std::deque<std::atomic<uint64_t>*> announce_timestamps;
+alignas(CACHE_LINE_SIZE) std::deque<std::atomic<uint64_t>*> read_indicators;
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
 // Initiate global timer
 GlobalTimer timer;
 static const uint64_t pause_timer = 100;
-
 std::mutex mtx;
 
 // Check for long transactions
@@ -113,27 +112,24 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
   while (!quit) {
     // Check for long transactions over x ms
     if (timer.elapsed() > std::chrono::milliseconds(pause_timer)){
-      // Acquire Lock
       std::lock_guard<std::mutex> lock(mtx);
+      // new thread size
+      size_t new_thread_num = thv.size() + 1;
       
       // Add Thread to announce timestamp
-      announce_timestamps.resize(FLAGS_thread_num + 1);
-      announce_timestamps[FLAGS_thread_num] = std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP);
+      announce_timestamps.push_back(new std::atomic<uint64_t>(NO_TIMESTAMP));
 
       // Add Thread to readIndicator
-      uint64_t NEW_NUM_RI_WORD = FLAGS_tuple_num * (FLAGS_thread_num + 1);
-      read_indicators.resize(NEW_NUM_RI_WORD);
-
       for(size_t i = 0; i < FLAGS_tuple_num; ++i) {
-        auto insert_index = (i + 1) * FLAGS_thread_num + i;
-        read_indicators.insert(read_indicators.begin() + insert_index,std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP));
+        auto insert_index = (i + 1) * new_thread_num - 1;
+        read_indicators.emplace(read_indicators.begin() + insert_index,new std::atomic<uint64_t>(NO_TIMESTAMP));
       }
       // Dynamically add a new worker thread
-      readys.resize(thv.size() + 1);
+      readys.resize(new_thread_num);
       thv.emplace_back(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
 
       // update thread size
-      FLAGS_thread_num = thv.size();
+      FLAGS_thread_num = new_thread_num;
     }
 
     // Sleep for long transaction time
@@ -154,9 +150,8 @@ int main(int argc, char *argv[]) try {
   static const uint64_t NUM_RI_WORD = NUM_RI * INITIAL_THREAD;
   // Initialize announce_timstamps
   // Set timestamps to the number of initial threads
-  announce_timestamps.resize(INITIAL_THREAD);
   for (size_t i = 0; i < INITIAL_THREAD; i++) {
-      announce_timestamps[i] = std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP);
+      announce_timestamps.push_back(new std::atomic<uint64_t>(NO_TIMESTAMP));
   }
   // wlocks setup [NUM_TUPLE]
   write_locks = new std::atomic<uint64_t>[NUM_RI];
@@ -164,9 +159,8 @@ int main(int argc, char *argv[]) try {
     write_locks[i].store(-1, std::memory_order_relaxed);
   }
   // readIndicator setup [NUM_THREAD x NUM_TUPLE]
-  read_indicators.resize(NUM_RI_WORD);
   for (size_t i = 0; i < NUM_RI_WORD; i++) {
-      read_indicators[i] = std::make_unique<std::atomic<uint64_t>>(NO_TIMESTAMP);
+      read_indicators.push_back(new std::atomic<uint64_t>(NO_TIMESTAMP));
   }
 
   alignas(CACHE_LINE_SIZE) bool start = false;
@@ -189,11 +183,22 @@ int main(int argc, char *argv[]) try {
   }
   // End Work
   storeRelease(quit, true);
+  // error here potentially?
   for (auto &th : thv) th.join();
   timer_thread.join();
 
   // Deallocate memory for write_locks
   delete[] write_locks;
+
+  // Deallocate memory for announce_timestamps
+  for (auto ptr : announce_timestamps) {
+    delete ptr;
+  }
+
+  // Deallocate memory for read_indicators
+  for (auto ptr : read_indicators) {
+    delete ptr;
+  }
 
   for (unsigned int i = 0; i < FLAGS_thread_num; ++i) {
     FAFNIRResult[0].addLocalAllResult(FAFNIRResult[i]);

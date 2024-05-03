@@ -14,7 +14,8 @@ namespace ccbench::testing {
 
 // Global Variable for testing
 extern std::atomic<uint64_t> conflict_clock;
-extern std::vector<std::atomic<uint64_t>> announce_timestamps;
+extern std::vector<std::unique_ptr<std::atomic<uint64_t>>> announce_timestamps;
+extern std::vector<std::unique_ptr<std::atomic<uint64_t>>> read_indicators;
 
 class make_db_test : public ::testing::Test {
 public:
