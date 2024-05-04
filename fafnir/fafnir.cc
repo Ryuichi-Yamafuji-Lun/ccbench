@@ -124,12 +124,14 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
         auto insert_index = (i + 1) * new_thread_num - 1;
         read_indicators.emplace(read_indicators.begin() + insert_index,new std::atomic<uint64_t>(NO_TIMESTAMP));
       }
-      // Dynamically add a new worker thread
-      readys.resize(new_thread_num);
-      thv.emplace_back(worker, thv.size(), std::ref(readys[thv.size()]), std::ref(start), std::ref(quit));
 
       // update thread size
       FLAGS_thread_num = new_thread_num;
+      
+      // Dynamically add a new worker thread
+      initResult();
+      readys.resize(new_thread_num);
+      thv.emplace_back(worker, new_thread_num - 1, std::ref(readys[new_thread_num - 1]), std::ref(start), std::ref(quit));
     }
 
     // Sleep for long transaction time
@@ -194,11 +196,13 @@ int main(int argc, char *argv[]) try {
   for (auto ptr : announce_timestamps) {
     delete ptr;
   }
+  announce_timestamps.clear();
 
   // Deallocate memory for read_indicators
   for (auto ptr : read_indicators) {
     delete ptr;
   }
+  read_indicators.clear();
 
   for (unsigned int i = 0; i < FLAGS_thread_num; ++i) {
     FAFNIRResult[0].addLocalAllResult(FAFNIRResult[i]);

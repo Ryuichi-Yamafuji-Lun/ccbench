@@ -76,42 +76,42 @@ build cmake_object_order_depends_target_fafnir.exe: phony || CMakeFiles/fafnir.e
 build CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/result.cc.o: CXX_COMPILER__fafnir.2eexe /home/ryuichilun/ccbench/common/result.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
   DEP_FILE = CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/result.cc.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
   OBJECT_DIR = CMakeFiles/fafnir.exe.dir
   OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common
 
 build CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/util.cc.o: CXX_COMPILER__fafnir.2eexe /home/ryuichilun/ccbench/common/util.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
   DEP_FILE = CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/util.cc.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
   OBJECT_DIR = CMakeFiles/fafnir.exe.dir
   OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common
 
 build CMakeFiles/fafnir.exe.dir/fafnir.cc.o: CXX_COMPILER__fafnir.2eexe ../fafnir.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
   DEP_FILE = CMakeFiles/fafnir.exe.dir/fafnir.cc.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
   OBJECT_DIR = CMakeFiles/fafnir.exe.dir
   OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir
 
 build CMakeFiles/fafnir.exe.dir/result.cc.o: CXX_COMPILER__fafnir.2eexe ../result.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
   DEP_FILE = CMakeFiles/fafnir.exe.dir/result.cc.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
   OBJECT_DIR = CMakeFiles/fafnir.exe.dir
   OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir
 
 build CMakeFiles/fafnir.exe.dir/transaction.cc.o: CXX_COMPILER__fafnir.2eexe ../transaction.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
   DEP_FILE = CMakeFiles/fafnir.exe.dir/transaction.cc.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
   OBJECT_DIR = CMakeFiles/fafnir.exe.dir
   OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir
 
 build CMakeFiles/fafnir.exe.dir/util.cc.o: CXX_COMPILER__fafnir.2eexe ../util.cc || cmake_object_order_depends_target_fafnir.exe
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=0 -DVAL_SIZE=4
   DEP_FILE = CMakeFiles/fafnir.exe.dir/util.cc.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -std=c++17
   OBJECT_DIR = CMakeFiles/fafnir.exe.dir
   OBJECT_FILE_DIR = CMakeFiles/fafnir.exe.dir
 
@@ -124,7 +124,7 @@ build CMakeFiles/fafnir.exe.dir/util.cc.o: CXX_COMPILER__fafnir.2eexe ../util.cc
 # Link the executable fafnir.exe
 
 build fafnir.exe: CXX_EXECUTABLE_LINKER__fafnir.2eexe CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/result.cc.o CMakeFiles/fafnir.exe.dir/home/ryuichilun/ccbench/common/util.cc.o CMakeFiles/fafnir.exe.dir/fafnir.cc.o CMakeFiles/fafnir.exe.dir/result.cc.o CMakeFiles/fafnir.exe.dir/transaction.cc.o CMakeFiles/fafnir.exe.dir/util.cc.o | /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0 /usr/lib/x86_64-linux-gnu/libgflags.so ../../third_party/mimalloc/out/release/libmimalloc.a ../../third_party/masstree/libkohler_masstree_json.a
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address
   LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0  /usr/lib/x86_64-linux-gnu/libgflags.so  ../../third_party/mimalloc/out/release/libmimalloc.a  ../../third_party/masstree/libkohler_masstree_json.a  -lpthread
   OBJECT_DIR = CMakeFiles/fafnir.exe.dir
   POST_BUILD = :
@@ -184,7 +184,7 @@ build cmake_object_order_depends_target_make_db_test: phony || test/CMakeFiles/m
 build test/CMakeFiles/make_db_test.dir/make_db_test.cpp.o: CXX_COMPILER__make_db_test ../test/make_db_test.cpp || cmake_object_order_depends_target_make_db_test
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=1 -DVAL_SIZE=4
   DEP_FILE = test/CMakeFiles/make_db_test.dir/make_db_test.cpp.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
   INCLUDES = -I../../third_party/googletest/googletest/include
   OBJECT_DIR = test/CMakeFiles/make_db_test.dir
   OBJECT_FILE_DIR = test/CMakeFiles/make_db_test.dir
@@ -192,7 +192,7 @@ build test/CMakeFiles/make_db_test.dir/make_db_test.cpp.o: CXX_COMPILER__make_db
 build test/CMakeFiles/make_db_test.dir/home/ryuichilun/ccbench/common/result.cc.o: CXX_COMPILER__make_db_test /home/ryuichilun/ccbench/common/result.cc || cmake_object_order_depends_target_make_db_test
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=1 -DVAL_SIZE=4
   DEP_FILE = test/CMakeFiles/make_db_test.dir/home/ryuichilun/ccbench/common/result.cc.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
   INCLUDES = -I../../third_party/googletest/googletest/include
   OBJECT_DIR = test/CMakeFiles/make_db_test.dir
   OBJECT_FILE_DIR = test/CMakeFiles/make_db_test.dir/home/ryuichilun/ccbench/common
@@ -200,7 +200,7 @@ build test/CMakeFiles/make_db_test.dir/home/ryuichilun/ccbench/common/result.cc.
 build test/CMakeFiles/make_db_test.dir/home/ryuichilun/ccbench/common/util.cc.o: CXX_COMPILER__make_db_test /home/ryuichilun/ccbench/common/util.cc || cmake_object_order_depends_target_make_db_test
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=1 -DVAL_SIZE=4
   DEP_FILE = test/CMakeFiles/make_db_test.dir/home/ryuichilun/ccbench/common/util.cc.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
   INCLUDES = -I../../third_party/googletest/googletest/include
   OBJECT_DIR = test/CMakeFiles/make_db_test.dir
   OBJECT_FILE_DIR = test/CMakeFiles/make_db_test.dir/home/ryuichilun/ccbench/common
@@ -208,7 +208,7 @@ build test/CMakeFiles/make_db_test.dir/home/ryuichilun/ccbench/common/util.cc.o:
 build test/CMakeFiles/make_db_test.dir/__/result.cc.o: CXX_COMPILER__make_db_test ../result.cc || cmake_object_order_depends_target_make_db_test
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=1 -DVAL_SIZE=4
   DEP_FILE = test/CMakeFiles/make_db_test.dir/__/result.cc.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
   INCLUDES = -I../../third_party/googletest/googletest/include
   OBJECT_DIR = test/CMakeFiles/make_db_test.dir
   OBJECT_FILE_DIR = test/CMakeFiles/make_db_test.dir/__
@@ -216,7 +216,7 @@ build test/CMakeFiles/make_db_test.dir/__/result.cc.o: CXX_COMPILER__make_db_tes
 build test/CMakeFiles/make_db_test.dir/__/transaction.cc.o: CXX_COMPILER__make_db_test ../transaction.cc || cmake_object_order_depends_target_make_db_test
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=1 -DVAL_SIZE=4
   DEP_FILE = test/CMakeFiles/make_db_test.dir/__/transaction.cc.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
   INCLUDES = -I../../third_party/googletest/googletest/include
   OBJECT_DIR = test/CMakeFiles/make_db_test.dir
   OBJECT_FILE_DIR = test/CMakeFiles/make_db_test.dir/__
@@ -224,7 +224,7 @@ build test/CMakeFiles/make_db_test.dir/__/transaction.cc.o: CXX_COMPILER__make_d
 build test/CMakeFiles/make_db_test.dir/__/util.cc.o: CXX_COMPILER__make_db_test ../util.cc || cmake_object_order_depends_target_make_db_test
   DEFINES = -DADD_ANALYSIS=0 -DBACK_OFF=0 -DBOOST_ALL_NO_LIB -DBOOST_FILESYSTEM_DYN_LINK -DDLR1 -DKEY_SIZE=8 -DKEY_SORT=0 -DMASSTREE_USE=1 -DVAL_SIZE=4
   DEP_FILE = test/CMakeFiles/make_db_test.dir/__/util.cc.o.d
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address   -Wall -Wextra -std=c++17
   INCLUDES = -I../../third_party/googletest/googletest/include
   OBJECT_DIR = test/CMakeFiles/make_db_test.dir
   OBJECT_FILE_DIR = test/CMakeFiles/make_db_test.dir/__
@@ -238,7 +238,7 @@ build test/CMakeFiles/make_db_test.dir/__/util.cc.o: CXX_COMPILER__make_db_test 
 # Link the executable test/make_db_test
 
 build test/make_db_test: CXX_EXECUTABLE_LINKER__make_db_test test/CMakeFiles/make_db_test.dir/make_db_test.cpp.o test/CMakeFiles/make_db_test.dir/home/ryuichilun/ccbench/common/result.cc.o test/CMakeFiles/make_db_test.dir/home/ryuichilun/ccbench/common/util.cc.o test/CMakeFiles/make_db_test.dir/__/result.cc.o test/CMakeFiles/make_db_test.dir/__/transaction.cc.o test/CMakeFiles/make_db_test.dir/__/util.cc.o | /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0 /usr/lib/x86_64-linux-gnu/libgflags.so /usr/lib/x86_64-linux-gnu/libglog.so ../../third_party/mimalloc/out/release/libmimalloc.a ../../third_party/masstree/libkohler_masstree_json.a ../../third_party/googletest/build/lib/libgtest.a ../../third_party/googletest/build/lib/libgtest_main.a
-  FLAGS = -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address
+  FLAGS = -fsanitize=address -fno-omit-frame-pointer -g -fno-omit-frame-pointer -fsanitize=address -fno-sanitize=alignment -fno-sanitize-recover=address
   LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0  /usr/lib/x86_64-linux-gnu/libgflags.so  /usr/lib/x86_64-linux-gnu/libglog.so  ../../third_party/mimalloc/out/release/libmimalloc.a  ../../third_party/masstree/libkohler_masstree_json.a  ../../third_party/googletest/build/lib/libgtest.a  ../../third_party/googletest/build/lib/libgtest_main.a  -lpthread
   OBJECT_DIR = test/CMakeFiles/make_db_test.dir
   POST_BUILD = :
