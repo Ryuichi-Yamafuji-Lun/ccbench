@@ -30,7 +30,7 @@ CMAKE_AR:FILEPATH=/usr/bin/ar
 
 //Choose the type of build, options are: None Debug Release RelWithDebInfo
 // MinSizeRel ...
-CMAKE_BUILD_TYPE:STRING=Debug
+CMAKE_BUILD_TYPE:STRING=Release
 
 //CXX compiler
 CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
@@ -44,7 +44,7 @@ CMAKE_CXX_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-9
 CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-9
 
 //Flags used by the CXX compiler during all build types.
-CMAKE_CXX_FLAGS:STRING=-fsanitize=address -fno-omit-frame-pointer
+CMAKE_CXX_FLAGS:STRING=
 
 //Flags used by the CXX compiler during DEBUG builds.
 CMAKE_CXX_FLAGS_DEBUG:STRING=-g
@@ -277,12 +277,6 @@ ccbench_fafnir_BINARY_DIR:STATIC=/home/ryuichilun/ccbench/fafnir/build
 
 //Value Computed by CMake
 ccbench_fafnir_SOURCE_DIR:STATIC=/home/ryuichilun/ccbench/fafnir
-
-//Value Computed by CMake
-ccbench_sf2pl_BINARY_DIR:STATIC=/home/ryuichilun/ccbench/fafnir/build
-
-//Value Computed by CMake
-ccbench_sf2pl_SOURCE_DIR:STATIC=/home/ryuichilun/ccbench/fafnir
 
 
 ########################

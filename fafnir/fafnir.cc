@@ -10,7 +10,7 @@
 #include <iostream>
 #include <string>  //string
 #include <thread>
-
+#include <memory>
 
 #define GLOBAL_VALUE_DEFINE
 
@@ -31,6 +31,16 @@
 #include "include/result.hh"
 #include "include/transaction.hh"
 #include "include/util.hh"
+
+// Global variables for fafnir
+alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
+alignas(CACHE_LINE_SIZE) std::deque<std::atomic<uint64_t>*> announce_timestamps;
+alignas(CACHE_LINE_SIZE) std::deque<std::atomic<uint64_t>*> read_indicators;
+alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
+// Initiate global timer
+GlobalTimer timer;
+static const uint64_t pause_timer = 10;
+std::mutex mtx;
 
 void worker(size_t thid, char &ready, const bool &start, const bool &quit) {
   Result &myres = std::ref(FAFNIRResult[thid]);
@@ -92,16 +102,6 @@ RETRY:
   return;
 }
 
-// Global variables for fafnir
-alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
-alignas(CACHE_LINE_SIZE) std::deque<std::atomic<uint64_t>*> announce_timestamps;
-alignas(CACHE_LINE_SIZE) std::deque<std::atomic<uint64_t>*> read_indicators;
-alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
-// Initiate global timer
-GlobalTimer timer;
-static const uint64_t pause_timer = 100;
-std::mutex mtx;
-
 // Check for long transactions
 void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys, bool& start, bool& quit) {
   while (!start) {
@@ -125,13 +125,12 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
         read_indicators.emplace(read_indicators.begin() + insert_index,new std::atomic<uint64_t>(NO_TIMESTAMP));
       }
 
-      // update thread size
-      FLAGS_thread_num = new_thread_num;
-      
       // Dynamically add a new worker thread
-      initResult();
       readys.resize(new_thread_num);
       thv.emplace_back(worker, new_thread_num - 1, std::ref(readys[new_thread_num - 1]), std::ref(start), std::ref(quit));
+
+      // update thread size
+      FLAGS_thread_num = new_thread_num;
     }
 
     // Sleep for long transaction time
