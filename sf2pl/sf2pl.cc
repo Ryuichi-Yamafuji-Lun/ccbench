@@ -84,8 +84,10 @@ RETRY:
      * local_commit_counts is used at ../include/backoff.hh to calculate about
      * backoff.
      */
-    storeRelease(myres.local_commit_counts_,
+    if (!loadAcquire(quit)){
+      storeRelease(myres.local_commit_counts_,
                  loadAcquire(myres.local_commit_counts_) + 1);
+    }
   }
 
   return;

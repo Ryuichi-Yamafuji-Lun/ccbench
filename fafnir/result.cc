@@ -8,4 +8,4 @@ using namespace std;
 
 alignas(CACHE_LINE_SIZE) std::vector<Result> FAFNIRResult;
 
-void initResult() { FAFNIRResult.resize(FLAGS_thread_num+100000000); }
+void initResult() { FAFNIRResult.resize(FLAGS_thread_num+10); }

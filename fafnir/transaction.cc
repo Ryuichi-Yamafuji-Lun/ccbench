@@ -140,10 +140,11 @@ void TxExecutor::begin() {
   if (this->current_attempt_ > 0) {
     // wait for conflict transaction to commit
     restart();
-  } else {
+  } 
+  else {
     // simulate short/long transaction
     if (this->thid_ < (FLAGS_thread_num - counter)) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100000));
+      std::this_thread::sleep_for(std::chrono::milliseconds(10000));
     }
   }
   ++this->current_attempt_;
