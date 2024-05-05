@@ -37,6 +37,8 @@ alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
 alignas(CACHE_LINE_SIZE) std::deque<std::atomic<uint64_t>*> announce_timestamps;
 alignas(CACHE_LINE_SIZE) std::deque<std::atomic<uint64_t>*> read_indicators;
 alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
+// track the how many threads added
+alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> counter{0};
 // Initiate global timer
 GlobalTimer timer;
 static const uint64_t pause_timer = 10;
@@ -128,7 +130,7 @@ void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys
       // Dynamically add a new worker thread
       readys.resize(new_thread_num);
       thv.emplace_back(worker, new_thread_num - 1, std::ref(readys[new_thread_num - 1]), std::ref(start), std::ref(quit));
-
+      counter += 1;
       // update thread size
       FLAGS_thread_num = new_thread_num;
     }

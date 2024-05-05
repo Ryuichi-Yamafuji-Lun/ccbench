@@ -137,6 +137,10 @@ void TxExecutor::begin() {
   if (this->current_attempt_ > 0) {
     // wait for conflict transaction to commit
     restart();
+  } else {
+    if (this->thid_ < FLAGS_thread_num) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(100000));
+    }
   }
   ++this->current_attempt_;
 }
@@ -223,15 +227,8 @@ void TxExecutor::write(uint64_t key) {
 #if ADD_ANALYSIS
   uint64_t start = rdtscp();
 #endif
-    // simulate short/long transaction
-  std::random_device rd;
-  std::mt19937 gen(rd());
-  std::uniform_int_distribution<> dis(0, 0);
-  int sleep_duration = dis(gen);
-  std::this_thread::sleep_for(std::chrono::milliseconds(sleep_duration));
   // if it already wrote the key object once.
   if (searchWriteSet(key)) goto FINISH_WRITE;
-  
   // check to see if key is in read_set_
   for (auto rItr = read_set_.begin(); rItr != read_set_.end(); ++rItr) {
     if ((*rItr).key_ == key) {  // hit

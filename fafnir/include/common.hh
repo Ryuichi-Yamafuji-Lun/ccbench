@@ -76,3 +76,5 @@ extern std::atomic<uint64_t>* write_locks;
 extern GlobalTimer timer;
 // mutex for resizing
 extern std::mutex mtx;
+// check how many threads added
+extern std::atomic<uint64_t> counter;
