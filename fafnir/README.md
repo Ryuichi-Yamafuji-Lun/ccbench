@@ -1,4 +1,4 @@
-# 2PL
+# FafnirDT
 
 ## How to use
 - Build masstree
