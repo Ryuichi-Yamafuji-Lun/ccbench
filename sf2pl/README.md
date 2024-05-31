@@ -1,4 +1,4 @@
-# 2PL
+# 2PLSF
 
 ## How to use
 - Build masstree
