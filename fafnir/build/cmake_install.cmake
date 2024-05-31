@@ -1,4 +1,4 @@
-# Install script for directory: /home/ryuichilun/ccbench/sf2pl
+# Install script for directory: /home/ryuichilun/ccbench/fafnir
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,7 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/ryuichilun/ccbench/sf2pl/build/test/cmake_install.cmake")
+  include("/home/ryuichilun/ccbench/fafnir/build/test/cmake_install.cmake")
 
 endif()
 
@@ -51,5 +51,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/ryuichilun/ccbench/sf2pl/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/ryuichilun/ccbench/fafnir/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

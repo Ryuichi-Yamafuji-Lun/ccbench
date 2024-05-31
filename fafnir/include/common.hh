@@ -1,11 +1,17 @@
 #pragma once
 
 #include <atomic>
+#include <vector>
+#include <memory>
+#include <chrono>
+#include <mutex>
+#include <deque>
 
 #include "../../include/cache_line_size.hh"
 #include "../../include/int64byte.hh"
 #include "../../include/masstree_wrapper.hh"
 #include "tuple.hh"
+#include "global_timer.hh"
 
 #include "gflags/gflags.h"
 #include "glog/logging.h"
@@ -36,7 +42,6 @@ DEFINE_bool(rmw, false,
             "True means read modify write, false means blind write.");
 DEFINE_uint64(rratio, 0, "read ratio of single transaction.");
 DEFINE_uint64(thread_num, 2, "Total number of worker threads.");
-// ERROR THIS CAUSES ERROR AS IT IS CONST SET TO WHATEVER TUPLE_NUM IS
 DEFINE_uint64(tuple_num, 1, "Total number of records.");
 DEFINE_bool(ycsb, true,
             "True uses zipf_skew, false uses faster random generator.");
@@ -59,12 +64,17 @@ static const uint64_t NO_TIMESTAMP = 0xFFFFFFFFFFFFFFFFULL;
 
 // GLOBAL 
 alignas(CACHE_LINE_SIZE) GLOBAL Tuple *Table;
-
-// Add Conflict Clock
+// Conflict Clock
 extern std::atomic<uint64_t> conflict_clock;
-// Add global dynamic array of Announce Timestamp 
-extern std::atomic<uint64_t>* announce_timestamps;
-// Add readIndicator [NUM_TUPLE * MAX_THR]
-extern std::atomic<uint64_t>* read_indicators;
-// Add wlock [NUM_TUPLE]
+// global dynamic array of Announce Timestamp 
+extern std::deque<std::atomic<uint64_t>*> announce_timestamps;
+// readIndicator [NUM_TUPLE * MAX_THR] 
+extern std::deque<std::atomic<uint64_t>*> read_indicators;
+// wlock [NUM_TUPLE]
 extern std::atomic<uint64_t>* write_locks;
+// Long transaction tracker
+extern GlobalTimer timer;
+// mutex for resizing
+extern std::mutex mtx;
+// check how many threads added
+extern std::atomic<uint64_t> counter;

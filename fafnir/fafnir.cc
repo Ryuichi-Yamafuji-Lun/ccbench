@@ -10,6 +10,7 @@
 #include <iostream>
 #include <string>  //string
 #include <thread>
+#include <memory>
 
 #define GLOBAL_VALUE_DEFINE
 
@@ -31,8 +32,20 @@
 #include "include/transaction.hh"
 #include "include/util.hh"
 
+// Global variables for fafnir
+alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
+alignas(CACHE_LINE_SIZE) std::deque<std::atomic<uint64_t>*> announce_timestamps;
+alignas(CACHE_LINE_SIZE) std::deque<std::atomic<uint64_t>*> read_indicators;
+alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
+// track the how many threads added
+alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> counter{0};
+// Initiate global timer
+GlobalTimer timer;
+static const uint64_t pause_timer = 10;
+std::mutex mtx;
+
 void worker(size_t thid, char &ready, const bool &start, const bool &quit) {
-  Result &myres = std::ref(SF2PLResult[thid]);
+  Result &myres = std::ref(FAFNIRResult[thid]);
   Xoroshiro128Plus rnd;
   rnd.init();
   TxExecutor trans(thid, (Result *) &myres);
@@ -57,7 +70,7 @@ void worker(size_t thid, char &ready, const bool &start, const bool &quit) {
                   FLAGS_rratio, FLAGS_rmw, FLAGS_ycsb, false, thid, myres);
 RETRY:
     if (loadAcquire(quit)) break;
-    if (thid == 0) leaderBackoffWork(backoff, SF2PLResult);
+    if (thid == 0) leaderBackoffWork(backoff, FAFNIRResult);
 
     trans.begin();
     for (auto itr = trans.pro_set_.begin(); itr != trans.pro_set_.end();
@@ -88,33 +101,62 @@ RETRY:
       storeRelease(myres.local_commit_counts_,
                  loadAcquire(myres.local_commit_counts_) + 1);
     }
+    
   }
-
   return;
 }
 
-// Global variables for sf2pl
-alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> conflict_clock{1};
-alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* announce_timestamps;
-alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* read_indicators;
-alignas(CACHE_LINE_SIZE) std::atomic<uint64_t>* write_locks;
+// Check for long transactions
+void TimerCheckerThread(std::vector<std::thread>& thv, std::vector<char>& readys, bool& start, bool& quit) {
+  while (!start) {
+    // Wait until the start flag is set
+    std::this_thread::yield();
+  }
+
+  while (!quit) {
+    // Check for long transactions over x ms
+    if (timer.elapsed() > std::chrono::milliseconds(pause_timer)){
+      std::lock_guard<std::mutex> lock(mtx);
+      // new thread size
+      size_t new_thread_num = thv.size() + 1;
+      
+      // Add Thread to announce timestamp
+      announce_timestamps.push_back(new std::atomic<uint64_t>(NO_TIMESTAMP));
+
+      // Add Thread to readIndicator
+      for(size_t i = 0; i < FLAGS_tuple_num; ++i) {
+        auto insert_index = (i + 1) * new_thread_num - 1;
+        read_indicators.emplace(read_indicators.begin() + insert_index,new std::atomic<uint64_t>(NO_TIMESTAMP));
+      }
+
+      // Dynamically add a new worker thread
+      readys.resize(new_thread_num);
+      thv.emplace_back(worker, new_thread_num - 1, std::ref(readys[new_thread_num - 1]), std::ref(start), std::ref(quit));
+      counter += 1;
+      // update thread size
+      FLAGS_thread_num = new_thread_num;
+    }
+
+    // Sleep for long transaction time
+    std::this_thread::sleep_for(std::chrono::milliseconds(pause_timer));
+  }
+}
 
 int main(int argc, char *argv[]) try {
-  gflags::SetUsageMessage("2PLSF benchmark.");
+  gflags::SetUsageMessage("FafnirDT benchmark.");
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   chkArg();
   makeDB();
   // set constants
   static const uint64_t NUM_RI = FLAGS_tuple_num;
 
-  static const uint64_t MAX_THREAD = FLAGS_thread_num;
+  static const uint64_t INITIAL_THREAD = FLAGS_thread_num;
 
-  static const uint64_t NUM_RI_WORD = NUM_RI * MAX_THREAD;
+  static const uint64_t NUM_RI_WORD = NUM_RI * INITIAL_THREAD;
   // Initialize announce_timstamps
-  // set timestamps to the number of threads
-  announce_timestamps = new std::atomic<uint64_t>[MAX_THREAD];
-  for (size_t i = 0; i < MAX_THREAD; i++) {
-    announce_timestamps[i].store(NO_TIMESTAMP, std::memory_order_relaxed);
+  // Set timestamps to the number of initial threads
+  for (size_t i = 0; i < INITIAL_THREAD; i++) {
+      announce_timestamps.push_back(new std::atomic<uint64_t>(NO_TIMESTAMP));
   }
   // wlocks setup [NUM_TUPLE]
   write_locks = new std::atomic<uint64_t>[NUM_RI];
@@ -122,9 +164,8 @@ int main(int argc, char *argv[]) try {
     write_locks[i].store(-1, std::memory_order_relaxed);
   }
   // readIndicator setup [NUM_THREAD x NUM_TUPLE]
-  read_indicators = new std::atomic<uint64_t>[NUM_RI_WORD];
   for (size_t i = 0; i < NUM_RI_WORD; i++) {
-    read_indicators[i].store(0, std::memory_order_relaxed);
+      read_indicators.push_back(new std::atomic<uint64_t>(NO_TIMESTAMP));
   }
 
   alignas(CACHE_LINE_SIZE) bool start = false;
@@ -136,28 +177,41 @@ int main(int argc, char *argv[]) try {
     thv.emplace_back(worker, i, std::ref(readys[i]), std::ref(start),
                      std::ref(quit));
   waitForReady(readys);
+
+  std::thread timer_thread(TimerCheckerThread, std::ref(thv), std::ref(readys), std::ref(start), std::ref(quit));
+  // Begin Timer
+  timer.start();
+  // Start Work
   storeRelease(start, true);
   for (size_t i = 0; i < FLAGS_extime; ++i) {
     sleepMs(1000);
   }
+  // End Work
   storeRelease(quit, true);
-
+  // error here potentially?
   for (auto &th : thv) th.join();
-
-  // Deallocate memory for announce_timestamps
-  delete[] announce_timestamps;
+  timer_thread.join();
 
   // Deallocate memory for write_locks
   delete[] write_locks;
 
+  // Deallocate memory for announce_timestamps
+  for (auto ptr : announce_timestamps) {
+    delete ptr;
+  }
+  announce_timestamps.clear();
+
   // Deallocate memory for read_indicators
-  delete[] read_indicators;
+  for (auto ptr : read_indicators) {
+    delete ptr;
+  }
+  read_indicators.clear();
 
   for (unsigned int i = 0; i < FLAGS_thread_num; ++i) {
-    SF2PLResult[0].addLocalAllResult(SF2PLResult[i]);
+    FAFNIRResult[0].addLocalAllResult(FAFNIRResult[i]);
   }
   ShowOptParameters();
-  SF2PLResult[0].displayAllResult(FLAGS_clocks_per_us, FLAGS_extime, FLAGS_thread_num);
+  FAFNIRResult[0].displayAllResult(FLAGS_clocks_per_us, FLAGS_extime, FLAGS_thread_num);
 
   return 0;
 } catch (bad_alloc&) {

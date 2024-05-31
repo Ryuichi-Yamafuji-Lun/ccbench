@@ -1,0 +1,8 @@
+/home/ryuichilun/ccbench/fafnir/build/CMakeFiles/rebuild_cache.dir
+/home/ryuichilun/ccbench/fafnir/build/CMakeFiles/edit_cache.dir
+/home/ryuichilun/ccbench/fafnir/build/CMakeFiles/test.dir
+/home/ryuichilun/ccbench/fafnir/build/CMakeFiles/fafnir.exe.dir
+/home/ryuichilun/ccbench/fafnir/build/test/CMakeFiles/rebuild_cache.dir
+/home/ryuichilun/ccbench/fafnir/build/test/CMakeFiles/edit_cache.dir
+/home/ryuichilun/ccbench/fafnir/build/test/CMakeFiles/test.dir
+/home/ryuichilun/ccbench/fafnir/build/test/CMakeFiles/make_db_test.dir
